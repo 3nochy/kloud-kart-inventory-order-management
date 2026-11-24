@@ -1,0 +1,273 @@
+CREATE VIEW
+CREATE VIEW
+CREATE VIEW
+CREATE VIEW
+CREATE VIEW
+--- A1. order value by meaning of status
+ clean_status | order_count | order_value  
+--------------+-------------+--------------
+ completed    |      111351 | 339609366.03
+ pending      |       16009 |  48499632.57
+ shipped      |       12848 |  40956904.87
+ cancelled    |       12697 |  38163973.23
+ refunded     |        6479 |  19834083.11
+(5 rows)
+
+--- A2. completed orders that a filter on the exact word completed would see
+ exact_word_only | all_completed | pct_seen 
+-----------------+---------------+----------
+           22091 |        111351 |     19.8
+(1 row)
+
+--- B1. size of the total-versus-items mismatch
+ mismatched_orders | null_order_totals | null_item_totals | rounding_sized | smallest_gap | largest_gap |   net_gap   | gross_gap  
+-------------------+-------------------+------------------+----------------+--------------+-------------+-------------+------------
+              2426 |                 0 |               28 |              0 |  -1130593.01 |   110757.80 | -3477551.62 | 5214733.92
+(1 row)
+
+--- B2. quantity distribution in order_items
+ quantity_bucket | item_rows | largest_quantity |  item_value  
+-----------------+-----------+------------------+--------------
+ 100+ or invalid |         6 |             9999 |   3073441.59
+ 1-10            |    336553 |               10 | 488217539.92
+(2 rows)
+
+--- B3. ten biggest gaps between order total and item total
+ order_id | clean_status | total_amount | items_total |     gap     | line_count | max_quantity 
+----------+--------------+--------------+-------------+-------------+------------+--------------
+   569332 | cancelled    |     14794.09 |  1145387.10 | -1130593.01 |          5 |          999
+   583621 | cancelled    |        87.35 |   873412.65 |  -873325.30 |          1 |         9999
+   551664 | completed    |      1879.21 |   826747.16 |  -824867.95 |          2 |          999
+   500230 | pending      |    198210.34 |   396376.94 |  -198166.60 |          3 |           10
+   637704 | pending      |      1794.61 |   114049.69 |  -112255.08 |          2 |         9999
+   582155 | completed    |    114252.00 |     3494.20 |   110757.80 |          8 |           10
+   600888 | shipped      |      4017.21 |   102869.11 |   -98851.90 |          5 |          999
+   609524 | completed    |     92980.49 |       92.29 |    92888.20 |          3 |            5
+   581721 | completed    |     64994.75 |   129719.42 |   -64724.67 |          5 |            3
+   517524 | completed    |     48057.66 |    90251.37 |   -42193.71 |          5 |            3
+(10 rows)
+
+--- B4. mismatches by size of the total relative to the items
+        gap_bucket        | order_count |   net_gap   
+--------------------------+-------------+-------------
+ total 50-100% of items   |        1334 | -1285301.95
+ total above items        |        1056 |   868591.15
+ null item total          |          28 |            
+ total below 50% of items |           8 | -3060840.82
+(4 rows)
+
+--- B5. do orders with a 100+ quantity line explain the mismatches?
+ has_quantity_outlier | order_count | mismatched |   net_gap   
+----------------------+-------------+------------+-------------
+ f                    |      159378 |       2420 |  -417568.64
+ t                    |           6 |          6 | -3059982.98
+(2 rows)
+
+--- B6. mismatches without an outlier line: how far off is the total?
+  total_to_items_ratio  | order_count 
+------------------------+-------------
+ 0.75000000000000000000 |         434
+ 0.90000000000000000000 |         431
+     1.1000000000000000 |         417
+     1.2500000000000000 |         399
+ 0.50000000000000000000 |         143
+ 1.00000000000000000000 |         130
+ 0.95000000000000000000 |          71
+                        |          53
+ 0.60000000000000000000 |          35
+ 0.55000000000000000000 |          35
+ 0.85000000000000000000 |          31
+ 0.80000000000000000000 |          27
+     1.0500000000000000 |          24
+ 0.65000000000000000000 |          24
+     1.1500000000000000 |          18
+(15 rows)
+
+--- B7. mismatch rate by status meaning
+ clean_status | mismatched | order_count | pct_mismatched 
+--------------+------------+-------------+----------------
+ cancelled    |        192 |       12697 |           1.51
+ completed    |       1719 |      111351 |           1.54
+ pending      |        253 |       16009 |           1.58
+ refunded     |         95 |        6479 |           1.47
+ shipped      |        167 |       12848 |           1.30
+(5 rows)
+
+--- B8. NULLs inside order_items that make an item total NULL
+ null_quantity | null_unit_price 
+---------------+-----------------
+             0 |             148
+(1 row)
+
+--- C1. customers sharing an email, and whether the names agree
+ email_groups | rows_in_groups | extra_rows | groups_with_same_name | groups_with_different_names 
+--------------+----------------+------------+-----------------------+-----------------------------
+          533 |           1068 |        535 |                   533 |                           0
+(1 row)
+
+--- C2. effect of duplicates on a top-100 spend ranking
+ merged_top100_missing_from_stored_top100 | people_with_spend_split_across_rows 
+------------------------------------------+-------------------------------------
+                                        1 |                                 502
+(1 row)
+
+--- D1. order_items whose order does not exist
+ item_rows | missing_orders | lowest_missing_order_id | highest_missing_order_id | units | quantity_outliers | item_value 
+-----------+----------------+-------------------------+--------------------------+-------+-------------------+------------
+       692 |            689 |                  900101 |                   999862 |   968 |                 0 |  826327.80
+(1 row)
+
+ lowest_existing_order_id | highest_existing_order_id 
+--------------------------+---------------------------
+                   500001 |                    659384
+(1 row)
+
+--- D2. orders whose customer does not exist
+ order_rows | missing_customers | lowest_missing_customer_id | highest_missing_customer_id | order_value | pct_of_all_order_value 
+------------+-------------------+----------------------------+-----------------------------+-------------+------------------------
+        210 |               190 |                     999007 |                      999997 |   665180.61 |                   0.14
+(1 row)
+
+ lowest_existing_customer_id | highest_existing_customer_id 
+-----------------------------+------------------------------
+                      100001 |                       140420
+(1 row)
+
+--- D3. inventory_log rows whose product does not exist
+ reason | log_rows | units | lowest_missing_product_id | highest_missing_product_id 
+--------+----------+-------+---------------------------+----------------------------
+ sale   |      120 |  -120 |                     99011 |                      99999
+(1 row)
+
+ lowest_existing_product_id | highest_existing_product_id 
+----------------------------+-----------------------------
+                       5001 |                        9023
+(1 row)
+
+--- E1. products whose counter disagrees with the log
+ products_off | counter_below_log | counter_above_log | negative_counter | net_gap_units | gross_gap_units | largest_shortfall | largest_surplus | net_gap_value | gross_gap_value 
+--------------+-------------------+-------------------+------------------+---------------+-----------------+-------------------+-----------------+---------------+-----------------
+          144 |               122 |                22 |                1 |         -2375 |            2553 |               -56 |               6 |   -3656269.44 |      3865699.34
+(1 row)
+
+--- E2. products with negative stock (oversold) and whether the log agrees
+ negative_stock_products | units_oversold | value_oversold | log_agrees_with_counter 
+-------------------------+----------------+----------------+-------------------------
+                      14 |            -27 |      -20627.76 |                      13
+(1 row)
+
+--- E3. do log signs match their reasons?
+   reason   | log_rows | positive | negative | zero_or_null 
+------------+----------+----------+----------+--------------
+ sale       |   262088 |        0 |   262088 |            0
+ restock    |    18857 |    18857 |        0 |            0
+ return     |      564 |      564 |        0 |            0
+ correction |      485 |      195 |      290 |            0
+ damage     |      268 |        0 |      268 |            0
+ stock_take |       90 |        0 |        0 |           90
+(6 rows)
+
+--- E4. shapes of the free-text note column
+       note_pattern       | log_rows 
+--------------------------+----------
+ <null>                   |   281927
+ counted by hand          |       86
+ see WhatsApp msg         |       80
+ ??                       |       76
+ POS mismatch             |       74
+ adjusted after complaint |       69
+ recount, not applied     |       40
+(7 rows)
+
+--- E5. log rows dated after the database clock
+ reason | log_rows | units 
+--------+----------+-------
+ sale   |       33 |   -59
+(1 row)
+
+--- E6. can specific log rows explain the gap?
+ products_off | gap_equals_minus_future_dated_rows | gap_equals_minus_not_applied_notes | gap_equals_minus_corrections | gap_equals_corrections | no_candidate_rows 
+--------------+------------------------------------+------------------------------------+------------------------------+------------------------+-------------------
+          144 |                                  0 |                                 39 |                           38 |                      0 |                87
+(1 row)
+
+--- E7. units sold: order_items (quantity under 100) against sale rows in the log
+ clean_status | item_rows | units  
+--------------+-----------+--------
+ cancelled    |     26524 |  41829
+ completed    |    234933 | 369973
+ pending      |     33670 |  53414
+ refunded     |     13564 |  21531
+ shipped      |     27170 |  42742
+(5 rows)
+
+ sale_log_rows | sale_units_in_log 
+---------------+-------------------
+        262088 |            412645
+(1 row)
+
+--- F1. categories a rollup from the roots would never reach
+ roots | unreachable_categories | products_under_unreachable | units_under_unreachable 
+-------+------------------------+----------------------------+-------------------------
+     7 |                      3 |                          6 |                     440
+(1 row)
+
+--- F2. the unreachable categories
+ category_id |    category_name    | parent_id 
+-------------+---------------------+-----------
+        9001 | Seasonal Promotions |      9002
+        9002 | Promotions          |      9001
+        9003 | Clearance           |      8999
+(3 rows)
+
+--- F3. cycle check: walk up from every category, capped at 20 steps
+ categories_inside_a_cycle | deepest_chain_reaching_a_root 
+---------------------------+-------------------------------
+                         2 |                             4
+(1 row)
+
+--- G1. order dates against the database clock
+       database_clock       |     first_order     |     last_order      | last_order_not_in_future | null_dates | orders_after_now | value_after_now | first_future_order  
+----------------------------+---------------------+---------------------+--------------------------+------------+------------------+-----------------+---------------------
+ 2026-11-24 10:17:13.722351 | 2025-08-02 05:00:54 | 2027-08-20 19:30:00 | 2026-11-23 07:06:00      |          0 |               16 |        41348.75 | 2026-11-26 05:46:00
+(1 row)
+
+--- G2. date ranges of the other tables
+  table_name   |     first_date      |      last_date      
+---------------+---------------------+---------------------
+ inventory_log | 2025-08-02 06:01:51 | 2027-08-20 19:30:00
+ products      | 2023-02-14 09:27:00 | 2025-08-02 20:34:00
+ customers     | 2022-07-29 06:09:00 | 2025-08-02 23:57:00
+(3 rows)
+
+--- G3. stock held by products with no category
+ uncategorised_products | units | stock_value 
+------------------------+-------+-------------
+                     31 |  3112 |  3281371.20
+(1 row)
+
+--- H1. the same product repeated within one order: identical or different?
+ repeated_groups | identical_lines | different_lines 
+-----------------+-----------------+-----------------
+             616 |             577 |              39
+(1 row)
+
+--- H2. for identical repeats, does the order total count every line or each once?
+ orders_with_identical_repeats | total_matches_every_line | total_matches_each_line_once 
+-------------------------------+--------------------------+------------------------------
+                           574 |                       38 |                          526
+(1 row)
+
+--- H3. item prices that differ from the current product price
+ item_rows | price_differs 
+-----------+---------------
+    336559 |          4264
+(1 row)
+
+--- H4. other duplicate and date sanity checks
+                 check_name                  |  n  
+---------------------------------------------+-----
+ products sharing a name                     | 841
+ orders dated before the customer registered |   0
+(2 rows)
+

@@ -1,0 +1,51 @@
+                check_name                |  n   
+------------------------------------------+------
+ categories: parent missing               |    1
+ customers: rows sharing an email         | 1068
+ inventory_log: product missing           |  120
+ order_items: null order/product          |    0
+ order_items: null quantity or unit_price |  148
+ order_items: order missing               |  692
+ order_items: product missing             |    0
+ order_items: qty <= 0                    |    0
+ orders: customer missing                 |  210
+ orders: null customer_id                 |    0
+ orders: null total_amount                |    0
+ orders: total <> sum(items)              | 2426
+ orders without items                     |    0
+ products: category missing               |    0
+ products: negative stock                 |   14
+ products: null category                  |   37
+ products: null/neg price                 |    0
+ products: stock <> sum(log)              |  144
+(18 rows)
+
+   status   |   n   
+------------+-------
+  completed | 22395
+ COMPLETED  | 22392
+ complete   | 22285
+ Completed  | 22188
+ completed  | 22091
+ Pending    |  8081
+ pending    |  7928
+ shipped    |  6516
+ Shipped    |  6332
+ Refunded   |  3262
+ cancelled  |  3238
+ refunded   |  3217
+ canceled   |  3209
+ Cancelled  |  3131
+ CANCELLED  |  3119
+(15 rows)
+
+   reason   |   n    
+------------+--------
+ sale       | 262088
+ restock    |  18857
+ return     |    564
+ correction |    485
+ damage     |    268
+ stock_take |     90
+(6 rows)
+
