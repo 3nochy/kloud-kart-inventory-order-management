@@ -1,0 +1,109 @@
+--- A. quantity distribution in order_items
+ qty_bucket | items  |    value     | max_qty 
+------------+--------+--------------+---------
+ 100+       |      6 |   3073441.59 |    9999
+ 1-10       | 336553 | 488217539.92 |      10
+(2 rows)
+
+--- A2. total vs items: orders with and without a 100+ quantity line
+ has_outlier | orders | mismatched |  net_diff   
+-------------+--------+------------+-------------
+ f           | 159378 |       2420 |  -417568.64
+ t           |      6 |          6 | -3059982.98
+(2 rows)
+
+--- B. mismatches without outliers: total/items ratio (buckets of 0.05)
+      ratio_bucket      | orders 
+------------------------+--------
+ 0.75000000000000000000 |    434
+ 0.90000000000000000000 |    431
+     1.1000000000000000 |    417
+     1.2500000000000000 |    399
+ 0.50000000000000000000 |    143
+ 1.00000000000000000000 |    130
+ 0.95000000000000000000 |     71
+                        |     53
+ 0.60000000000000000000 |     35
+ 0.55000000000000000000 |     35
+ 0.85000000000000000000 |     31
+ 0.80000000000000000000 |     27
+     1.0500000000000000 |     24
+ 0.65000000000000000000 |     24
+     1.1500000000000000 |     18
+(15 rows)
+
+--- C. orders with a NULL total
+ null_total_orders | items_value 
+-------------------+-------------
+                 0 |            
+(1 row)
+
+--- D. identical repeated lines: does the order total include both copies?
+ orders_with_identical_repeats | total_matches_all_lines | total_matches_deduplicated 
+-------------------------------+-------------------------+----------------------------
+                           574 |                      38 |                        526
+(1 row)
+
+--- E1. inventory_log rows dated after the database clock
+ reason | log_rows | units 
+--------+----------+-------
+ sale   |       33 |   -59
+(1 row)
+
+--- E2. can the stock gap be explained by specific log rows?
+DROP TABLE
+SELECT 144
+ gap_products | gap_equals_future_rows | gap_equals_not_applied_notes | gap_equals_corrections | gap_equals_corrections_flipped | no_candidate_rows 
+--------------+------------------------+------------------------------+------------------------+--------------------------------+-------------------
+          144 |                      0 |                           39 |                     38 |                              0 |                87
+(1 row)
+
+--- E3. units in order_items (quantity < 100) by cleaned status vs sale units in the log
+ status_clean | items  | units  
+--------------+--------+--------
+ cancelled    |  26524 |  41829
+ completed    | 234933 | 369973
+ pending      |  33670 |  53414
+ refunded     |  13564 |  21531
+ shipped      |  27170 |  42742
+(5 rows)
+
+ sale_rows | sale_units_in_log 
+-----------+-------------------
+    262088 |            412645
+(1 row)
+
+--- F1. orders with a missing customer: id range vs real customers
+ customers_min | customers_max | missing_min | missing_max | orders | distinct_missing 
+---------------+---------------+-------------+-------------+--------+------------------
+        100001 |        140420 |      999007 |      999997 |    210 |              190
+(1 row)
+
+--- F2. orphan order_items: units and quantity outliers
+ items | units | outliers | max_qty 
+-------+-------+----------+---------
+   692 |   968 |        0 |       3
+(1 row)
+
+--- F3. inventory_log rows for products that do not exist
+ reason | log_rows | units | min_pid | max_pid 
+--------+----------+-------+---------+---------
+ sale   |      120 |  -120 |   99011 |   99999
+(1 row)
+
+ products_min | products_max 
+--------------+--------------
+         5001 |         9023
+(1 row)
+
+--- G. dates and uncategorised stock
+ last_order_not_in_future | future_orders 
+--------------------------+---------------
+ 2026-11-23 07:06:00      |            16
+(1 row)
+
+ uncategorised_products | units | stock_value 
+------------------------+-------+-------------
+                     31 |  3112 |  3281371.20
+(1 row)
+
