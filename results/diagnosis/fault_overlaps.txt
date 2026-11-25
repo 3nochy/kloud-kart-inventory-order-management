@@ -1,0 +1,41 @@
+--- A. NULL unit_price: whole orders or some lines?
+ null_price_pattern | order_count | mismatched_orders 
+--------------------+-------------+-------------------
+ every line null    |          28 |                28
+ no null price      |      159237 |              2279
+ some lines null    |         119 |               119
+(3 rows)
+
+CREATE VIEW
+--- B. mismatched orders by likely cause
+         likely_cause          | order_count |   net_gap   
+-------------------------------+-------------+-------------
+ 1 quantity typo (100+)        |           6 | -3059982.98
+ 2 null unit_price             |         146 |   323142.93
+ 3 repeated line counted twice |         526 |  -882144.66
+ 4 unexplained                 |        1748 |   141433.09
+(4 rows)
+
+--- C. the unexplained orders: how far is the total from the items?
+  total_to_items_ratio  | order_count 
+------------------------+-------------
+ 0.75000000000000000000 |         412
+     1.1000000000000000 |         409
+     1.2500000000000000 |         395
+ 0.90000000000000000000 |         389
+ 1.00000000000000000000 |          28
+                        |          25
+     1.0500000000000000 |          11
+     1.1500000000000000 |           9
+     1.2000000000000000 |           9
+     1.4000000000000000 |           5
+     1.4500000000000000 |           4
+     1.5000000000000000 |           3
+(12 rows)
+
+--- D. which log reasons carry the note recount, not applied?
+   reason   | log_rows 
+------------+----------
+ correction |       40
+(1 row)
+
