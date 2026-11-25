@@ -96,3 +96,30 @@ FROM inventory_log
 WHERE inventory_log.note = 'recount, not applied'
 GROUP BY inventory_log.reason
 ORDER BY log_rows DESC;
+
+\echo '--- E. unexplained orders: exact ratio of total to items (4 decimals)'
+-- If the ratios are exact (0.7500, 0.9000, 1.1000, 1.2500) the totals were produced by a
+-- rule; if they are scattered, the buckets in section C only look regular.
+SELECT round(mismatch_causes.total_amount / mismatch_causes.items_total, 4) AS exact_ratio,
+       count(*)                                                             AS order_count
+FROM mismatch_causes
+WHERE mismatch_causes.likely_cause = '4 unexplained'
+  AND mismatch_causes.items_total > 0
+GROUP BY exact_ratio
+ORDER BY order_count DESC
+LIMIT 15;
+
+\echo '--- F. unexplained orders where the item total is zero'
+SELECT count(*)                                     AS orders,
+       round(sum(mismatch_causes.total_amount), 2)  AS header_value
+FROM mismatch_causes
+WHERE mismatch_causes.likely_cause = '4 unexplained'
+  AND mismatch_causes.items_total = 0;
+
+\echo '--- G. gross gap by cause (the net gap hides gaps that cancel out)'
+SELECT mismatch_causes.likely_cause,
+       count(*)                                                                    AS order_count,
+       round(sum(abs(mismatch_causes.total_amount - mismatch_causes.items_total)), 2) AS gross_gap
+FROM mismatch_causes
+GROUP BY mismatch_causes.likely_cause
+ORDER BY mismatch_causes.likely_cause;

@@ -39,3 +39,38 @@ CREATE VIEW
  correction |       40
 (1 row)
 
+--- E. unexplained orders: exact ratio of total to items (4 decimals)
+ exact_ratio | order_count 
+-------------+-------------
+      0.7500 |         382
+      0.9000 |         365
+      1.1000 |         365
+      1.2500 |         357
+      0.7499 |          13
+      1.2501 |          13
+      1.1001 |          12
+      1.0999 |          12
+      1.2499 |          12
+      0.9001 |          11
+      0.8999 |           9
+      0.7498 |           6
+      0.7502 |           5
+      1.2503 |           4
+      0.7501 |           3
+(15 rows)
+
+--- F. unexplained orders where the item total is zero
+ orders | header_value 
+--------+--------------
+     25 |     14320.30
+(1 row)
+
+--- G. gross gap by cause (the net gap hides gaps that cancel out)
+         likely_cause          | order_count | gross_gap  
+-------------------------------+-------------+------------
+ 1 quantity typo (100+)        |           6 | 3059982.98
+ 2 null unit_price             |         146 |  323142.93
+ 3 repeated line counted twice |         526 |  882144.66
+ 4 unexplained                 |        1748 |  949463.35
+(4 rows)
+
