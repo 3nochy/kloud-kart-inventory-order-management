@@ -1,0 +1,57 @@
+Timing is on.
+SET
+Time: 0.443 ms
+                                                                                                             QUERY PLAN                                                                                                              
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Limit  (cost=0.30..7809687.87 rows=500 width=76) (actual time=304.789..10133.328 rows=500.00 loops=1)
+   Buffers: shared hit=1917221 read=1283 dirtied=4
+   CTE report_window
+     ->  Result  (cost=0.00..0.01 rows=1 width=16) (actual time=0.002..0.003 rows=1.00 loops=1)
+   ->  Index Only Scan using customers_pkey on customers  (cost=0.29..631335143.07 rows=40420 width=76) (actual time=42.322..9870.452 rows=500.00 loops=1)
+         Heap Fetches: 0
+         Index Searches: 1
+         Buffers: shared hit=1917221 read=1283 dirtied=4
+         SubPlan 3
+           ->  Aggregate  (cost=5073.30..5073.31 rows=1 width=32) (actual time=6.368..6.368 rows=1.00 loops=500)
+                 Buffers: shared hit=638221 read=1279 dirtied=4
+                 InitPlan 2
+                   ->  CTE Scan on report_window  (cost=0.00..0.02 rows=1 width=8) (actual time=0.007..0.007 rows=1.00 loops=1)
+                         Storage: Memory  Maximum Storage: 17kB
+                 ->  Seq Scan on orders customer_orders  (cost=0.00..5073.28 rows=1 width=7) (actual time=2.015..6.357 rows=3.02 loops=500)
+                       Filter: ((order_date < (InitPlan 2).col1) AND (customer_id = customers.customer_id) AND (lower(TRIM(BOTH FROM status)) = ANY ('{complete,completed,shipped}'::text[])))
+                       Rows Removed by Filter: 159381
+                       Buffers: shared hit=638221 read=1279 dirtied=4
+         SubPlan 5
+           ->  Aggregate  (cost=5073.30..5073.31 rows=1 width=8) (actual time=6.391..6.391 rows=1.00 loops=500)
+                 Buffers: shared hit=639500
+                 InitPlan 4
+                   ->  CTE Scan on report_window report_window_1  (cost=0.00..0.02 rows=1 width=8) (actual time=0.022..0.022 rows=1.00 loops=1)
+                         Storage: Memory  Maximum Storage: 17kB
+                 ->  Seq Scan on orders customer_orders_1  (cost=0.00..5073.28 rows=1 width=0) (actual time=2.022..6.384 rows=3.02 loops=500)
+                       Filter: ((order_date < (InitPlan 4).col1) AND (customer_id = customers.customer_id) AND (lower(TRIM(BOTH FROM status)) = ANY ('{complete,completed,shipped}'::text[])))
+                       Rows Removed by Filter: 159381
+                       Buffers: shared hit=639500
+         SubPlan 8
+           ->  Aggregate  (cost=5472.72..5472.73 rows=1 width=32) (actual time=6.966..6.966 rows=1.00 loops=500)
+                 Buffers: shared hit=639500
+                 InitPlan 6
+                   ->  CTE Scan on report_window report_window_2  (cost=0.00..0.02 rows=1 width=8) (actual time=0.003..0.004 rows=1.00 loops=1)
+                         Storage: Memory  Maximum Storage: 17kB
+                 InitPlan 7
+                   ->  CTE Scan on report_window report_window_3  (cost=0.00..0.02 rows=1 width=8) (actual time=0.003..0.003 rows=1.00 loops=1)
+                         Storage: Memory  Maximum Storage: 17kB
+                 ->  Seq Scan on orders customer_orders_2  (cost=0.00..5472.67 rows=1 width=7) (actual time=2.658..6.955 rows=2.77 loops=500)
+                       Filter: ((order_date >= (InitPlan 6).col1) AND (order_date < (InitPlan 7).col1) AND (customer_id = customers.customer_id) AND (lower(TRIM(BOTH FROM status)) = ANY ('{complete,completed,shipped}'::text[])))
+                       Rows Removed by Filter: 159381
+                       Buffers: shared hit=639500
+ Planning:
+   Buffers: shared hit=138 read=25 dirtied=1
+ Planning Time: 11.739 ms
+ JIT:
+   Functions: 25
+   Options: Inlining true, Optimization true, Expressions true, Deforming true
+   Timing: Generation 0.986 ms (Deform 0.332 ms), Inlining 93.196 ms, Optimization 89.435 ms, Emission 79.935 ms, Total 263.552 ms
+ Execution Time: 10237.917 ms
+(49 rows)
+
+Time: 10265.214 ms (00:10.265)

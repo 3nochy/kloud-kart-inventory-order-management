@@ -1,0 +1,17 @@
+--- highest-priority physical counts
+ review_priority | product_id |     product_name      | current_stock | logged_net_change | units_difference | estimated_value_at_current_price |          review_reason          
+-----------------+------------+-----------------------+---------------+-------------------+------------------+----------------------------------+---------------------------------
+               1 |       5605 | Midea Refrigerator XL |           140 |               186 |              -46 |                        745441.50 | counter below logged net change
+               2 |       8420 | Voltic ProBook Plus   |           220 |               268 |              -48 |                        618094.56 | counter below logged net change
+               3 |       8174 | JBL Soft Drink        |           400 |               426 |              -26 |                        395125.12 | counter below logged net change
+               4 |       7526 | Redmi Water           |           220 |               244 |              -24 |                        279770.16 | counter below logged net change
+               5 |       6856 | LG Women Footwear XL  |            90 |               134 |              -44 |                        152704.20 | counter below logged net change
+               6 |       6183 | Redmi Toiletrie Plus  |           140 |               184 |              -44 |                        150416.64 | counter below logged net change
+               7 |       6837 | Voltic Trouser        |           400 |               432 |              -32 |                        123208.96 | counter below logged net change
+               8 |       7304 | Oraimo Over-Ear Lite  |           400 |               443 |              -43 |                        122199.12 | counter below logged net change
+               9 |       6743 | Nasco First Aid Max   |           400 |               426 |              -26 |                        116169.04 | counter below logged net change
+              10 |       8866 | Hisense Iron Plus     |             2 |                 7 |               -5 |                        106757.35 | counter below logged net change
+(10 rows)
+
+DO
+--- queue assertions passed: 144 products need physical review

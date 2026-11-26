@@ -1,48 +1,5 @@
 BEGIN
---- 1. customer that does not exist (expect success = f, Customer not found)
- success | order_id |      message       
----------+----------+--------------------
- f       |          | Customer not found
-(1 row)
-
---- 2. quantity zero (expect success = f, Invalid quantity)
- success | order_id |               message                
----------+----------+--------------------------------------
- f       |          | Invalid quantity: must be at least 1
-(1 row)
-
---- 3. product that does not exist (expect success = f, Product not found)
- success | order_id |      message      
----------+----------+-------------------
- f       |          | Product not found
-(1 row)
-
---- 4. more units than exist (expect success = f, Out of stock)
- success | order_id |                        message                        
----------+----------+-------------------------------------------------------
- f       |          | Out of stock: 90 unit(s) available, 1000000 requested
-(1 row)
-
---- 5. a normal purchase (expect success = t); stock must fall by exactly 1
- stock_before 
---------------
-           90
-(1 row)
-
- success | order_id |   message    
----------+----------+--------------
- t       |   999863 | Order placed
-(1 row)
-
- stock_after 
--------------
-          89
-(1 row)
-
---- 6. the movement was logged against the new order (expect 1 row)
- reason | change_qty | linked_to_order 
---------+------------+-----------------
- sale   |         -1 | t
-(1 row)
-
+SELECT 1
+DO
+All place_order checks passed
 ROLLBACK

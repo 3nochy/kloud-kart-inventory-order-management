@@ -1,0 +1,36 @@
+Timing is on.
+BEGIN
+Time: 0.189 ms
+SELECT 1
+Time: 2.987 ms
+INSERT 0 1
+Time: 1.868 ms
+--- restock: add five units
+      record_stock_movement       
+----------------------------------
+ (t,15,"Stock movement recorded")
+(1 row)
+
+Time: 5.463 ms
+--- correction: remove two units
+      record_stock_movement       
+----------------------------------
+ (t,13,"Stock movement recorded")
+(1 row)
+
+Time: 0.737 ms
+--- direct stock update: trigger should log as correction
+UPDATE 1
+Time: 2.342 ms
+--- refused movement: stock must remain unchanged and no log row should be added
+                      record_stock_movement                       
+------------------------------------------------------------------
+ (f,16,"Movement refused: only 16 unit(s) are recorded in stock")
+(1 row)
+
+Time: 0.559 ms
+DO
+Time: 5.265 ms
+--- all stock-movement assertions passed; rolling fixture back
+ROLLBACK
+Time: 0.570 ms

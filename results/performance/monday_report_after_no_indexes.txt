@@ -1,0 +1,100 @@
+--- 1. the top 100
+                                                                                          QUERY PLAN                                                                                          
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ GroupAggregate  (cost=46.75..4665.81 rows=99 width=424) (actual time=0.397..4.617 rows=100.00 loops=1)
+   Group Key: customer_spend_totals.spend_rank, customer_spend_totals.customer_id, customer_spend_totals.full_name, customer_spend_totals.total_spent, customer_spend_totals.order_count
+   Buffers: shared hit=1517
+   ->  Incremental Sort  (cost=46.75..4575.72 rows=1188 width=51) (actual time=0.379..3.974 rows=1200.00 loops=1)
+         Sort Key: customer_spend_totals.spend_rank, customer_spend_totals.customer_id, customer_spend_totals.full_name, customer_spend_totals.total_spent, customer_spend_totals.order_count
+         Presorted Key: customer_spend_totals.spend_rank
+         Full-sort Groups: 34  Sort Method: quicksort  Average Memory: 27kB  Peak Memory: 27kB
+         Buffers: shared hit=1517
+         ->  Nested Loop  (cost=0.71..4537.60 rows=1188 width=51) (actual time=0.049..3.299 rows=1200.00 loops=1)
+               Buffers: shared hit=1505
+               ->  Index Scan using customer_spend_totals_rank_idx on customer_spend_totals  (cost=0.29..10.02 rows=99 width=40) (actual time=0.008..0.029 rows=100.00 loops=1)
+                     Index Cond: (spend_rank <= 100)
+                     Index Searches: 1
+                     Buffers: shared hit=3
+               ->  Index Scan using customer_monthly_spend_customer_month_idx on customer_monthly_spend  (cost=0.42..45.61 rows=12 width=15) (actual time=0.006..0.030 rows=12.00 loops=100)
+                     Index Cond: (customer_id = customer_spend_totals.customer_id)
+                     Index Searches: 100
+                     Buffers: shared hit=1502
+ Planning:
+   Buffers: shared hit=389
+ Planning Time: 1.624 ms
+ Execution Time: 4.739 ms
+(22 rows)
+
+--- 2. the whole report, every customer
+                                                                                                QUERY PLAN                                                                                                
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Finalize GroupAggregate  (cost=33138.81..69760.12 rows=40420 width=424) (actual time=196.093..628.852 rows=40420.00 loops=1)
+   Group Key: customer_spend_totals.customer_id, customer_spend_totals.full_name, customer_spend_totals.total_spent, customer_spend_totals.order_count, customer_spend_totals.spend_rank
+   Buffers: shared hit=4767, temp read=4163 written=4174
+   ->  Gather Merge  (cost=33138.81..61110.24 rows=97008 width=424) (actual time=196.062..450.469 rows=120148.00 loops=1)
+         Workers Planned: 2
+         Workers Launched: 2
+         Buffers: shared hit=4767, temp read=4163 written=4174
+         ->  Partial GroupAggregate  (cost=32138.79..48913.09 rows=40420 width=424) (actual time=189.652..366.741 rows=40049.33 loops=3)
+               Group Key: customer_spend_totals.customer_id, customer_spend_totals.full_name, customer_spend_totals.total_spent, customer_spend_totals.order_count, customer_spend_totals.spend_rank
+               Buffers: shared hit=4767, temp read=4163 written=4174
+               ->  Sort  (cost=32138.79..32644.04 rows=202100 width=51) (actual time=189.627..255.235 rows=161680.00 loops=3)
+                     Sort Key: customer_spend_totals.customer_id, customer_spend_totals.full_name, customer_spend_totals.total_spent, customer_spend_totals.order_count, customer_spend_totals.spend_rank
+                     Sort Method: external merge  Disk: 11248kB
+                     Buffers: shared hit=4767, temp read=4163 written=4174
+                     Worker 0:  Sort Method: external merge  Disk: 11200kB
+                     Worker 1:  Sort Method: external merge  Disk: 10856kB
+                     ->  Hash Join  (cost=1283.45..7420.02 rows=202100 width=51) (actual time=8.172..101.897 rows=161680.00 loops=3)
+                           Hash Cond: (customer_monthly_spend.customer_id = customer_spend_totals.customer_id)
+                           Buffers: shared hit=4707
+                           ->  Parallel Seq Scan on customer_monthly_spend  (cost=0.00..5606.00 rows=202100 width=15) (actual time=0.007..14.170 rows=161680.00 loops=3)
+                                 Buffers: shared hit=3585
+                           ->  Hash  (cost=778.20..778.20 rows=40420 width=40) (actual time=7.869..7.870 rows=40420.00 loops=3)
+                                 Buckets: 65536  Batches: 1  Memory Usage: 3508kB
+                                 Buffers: shared hit=1122
+                                 ->  Seq Scan on customer_spend_totals  (cost=0.00..778.20 rows=40420 width=40) (actual time=0.016..2.043 rows=40420.00 loops=3)
+                                       Buffers: shared hit=1122
+ Planning:
+   Buffers: shared hit=26
+ Planning Time: 0.356 ms
+ Execution Time: 633.127 ms
+(30 rows)
+
+--- 3. one customer's running total
+                                                                                     QUERY PLAN                                                                                     
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ WindowAgg  (cost=4276.41..4373.07 rows=850 width=55) (actual time=11.837..13.931 rows=4.00 loops=1)
+   Window: w1 AS (ORDER BY orders.order_date, orders.order_id ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)
+   Storage: Memory  Maximum Storage: 17kB
+   Buffers: shared hit=1339
+   ->  Nested Loop  (cost=4276.30..4358.19 rows=850 width=23) (actual time=11.803..13.900 rows=4.00 loops=1)
+         Join Filter: (orders.order_date < (report_settings.as_of_date + 1))
+         Buffers: shared hit=1339
+         ->  Nested Loop  (cost=4276.30..4284.44 rows=1 width=23) (actual time=11.795..13.886 rows=4.00 loops=1)
+               Buffers: shared hit=1335
+               ->  Gather Merge  (cost=4276.01..4276.12 rows=1 width=23) (actual time=11.753..13.836 rows=4.00 loops=1)
+                     Workers Planned: 1
+                     Workers Launched: 1
+                     Buffers: shared hit=1326
+                     ->  Sort  (cost=3276.00..3276.00 rows=1 width=23) (actual time=9.620..9.622 rows=2.00 loops=2)
+                           Sort Key: orders.order_date, orders.order_id
+                           Sort Method: quicksort  Memory: 25kB
+                           Buffers: shared hit=1326
+                           Worker 0:  Sort Method: quicksort  Memory: 25kB
+                           ->  Parallel Seq Scan on orders  (cost=0.00..3275.99 rows=1 width=23) (actual time=0.460..9.557 rows=2.00 loops=2)
+                                 Filter: ((total_amount IS NOT NULL) AND (customer_id = 100001) AND (lower(TRIM(BOTH FROM status)) = ANY ('{complete,completed,shipped}'::text[])))
+                                 Rows Removed by Filter: 79690
+                                 Buffers: shared hit=1282
+               ->  Index Only Scan using customers_pkey on customers  (cost=0.29..8.31 rows=1 width=4) (actual time=0.010..0.011 rows=1.00 loops=4)
+                     Index Cond: (customer_id = 100001)
+                     Heap Fetches: 0
+                     Index Searches: 4
+                     Buffers: shared hit=9
+         ->  Seq Scan on report_settings  (cost=0.00..35.50 rows=2550 width=4) (actual time=0.002..0.002 rows=1.00 loops=4)
+               Buffers: shared hit=4
+ Planning:
+   Buffers: shared hit=275
+ Planning Time: 0.716 ms
+ Execution Time: 13.994 ms
+(33 rows)
+
