@@ -2,7 +2,9 @@
 -- Purpose : give new rows safe ids and let an auditor link a stock movement to its order.
 -- Input   : freshly loaded Kloud Kart database.
 -- Output  : inventory_log.order_id column; three sequences positioned above every id in use.
--- Safety  : rerunnable. Changes the schema; documented in docs/.
+-- Safety  : rerunnable. Changes the schema; recorded in
+--           docs/adr/ADR-004-link-log-to-order.md and
+--           docs/adr/ADR-005-ids-from-sequences.md.
 
 -- Decision: nothing links inventory_log to orders today (only free-text reason and note).
 -- A nullable column keeps the 282,352 existing rows valid; they stay NULL.

@@ -5,7 +5,13 @@
 -- Output  : one row (success, order_id, message).
 -- Safety  : rerunnable (CREATE OR REPLACE). Writes only inside the function's own transaction.
 --
--- Decisions (each defended in docs/3_key_decisions.md):
+-- Decisions, recorded in full in:
+--   docs/adr/ADR-001-lock-product-row.md
+--   docs/adr/ADR-002-function-one-product-per-call.md
+--   docs/adr/ADR-003-log-sale-at-placement.md
+--   docs/adr/ADR-004-link-log-to-order.md
+--   docs/adr/ADR-005-ids-from-sequences.md
+-- Summary:
 --   * A function, not a procedure: race_test.py calls it inside a SELECT, and a function
 --     is one atomic unit that either does everything or nothing.
 --   * Row lock (FOR UPDATE) rather than Serializable plus retries: the second buyer waits
@@ -16,7 +22,7 @@
 --     locks products in ascending product_id order.
 --   * The customer is checked before the lock is taken, to keep the lock held as briefly
 --     as possible; everything between the lock and the end of the function is cheap.
---   * Status 'pending' and log reason 'sale': assumption, see docs/3_key_decisions.md.
+--   * Status 'pending' and log reason 'sale': see docs/adr/ADR-003-log-sale-at-placement.md.
 --
 -- Naming: RETURNS TABLE creates variables called success, order_id and message, so every
 -- column reference below is qualified with its table name to avoid ambiguity.
@@ -85,7 +91,7 @@ BEGIN
 
     v_new_order_id := nextval('orders_order_id_seq');
 
-    -- Decision: total_amount is written from the price and quantity, matching the
+    -- Note: total_amount is written from the price and quantity, matching the
     -- header-equals-items rule the clean part of the existing data follows.
     INSERT INTO orders (order_id, customer_id, order_date, status, total_amount)
     VALUES (v_new_order_id, p_customer_id, now(), 'pending', v_price * p_quantity);
