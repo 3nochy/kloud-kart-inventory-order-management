@@ -3,7 +3,7 @@
 --           last unit. Contract fixed by race_test.py.
 -- Input   : place_order(customer id, product id, quantity).
 -- Output  : one row (success, order_id, message).
--- Safety  : rerunnable (CREATE OR REPLACE). Writes only inside the function's own transaction.
+-- Safety  : rerunnable (CREATE OR REPLACE). The call is atomic in its caller's transaction.
 --
 -- Decisions, recorded in full in:
 --   docs/adr/ADR-001-lock-product-row.md
@@ -11,6 +11,7 @@
 --   docs/adr/ADR-003-log-sale-at-placement.md
 --   docs/adr/ADR-004-link-log-to-order.md
 --   docs/adr/ADR-005-ids-from-sequences.md
+--   docs/adr/ADR-007-audit-every-stock-change.md
 -- Summary:
 --   * A function, not a procedure: race_test.py calls it inside a SELECT, and a function
 --     is one atomic unit that either does everything or nothing.
@@ -85,11 +86,25 @@ BEGIN
         RETURN;
     END IF;
 
+    v_new_order_id := nextval('orders_order_id_seq');
+
+    -- The stock-change trigger writes the audit row. These transaction-local values
+    -- tell it that this movement is a sale and link it to the order being created.
+    PERFORM set_config('kloudkart.stock_reason', 'sale', true);
+    PERFORM set_config('kloudkart.stock_note', 'placed by place_order', true);
+    PERFORM set_config('kloudkart.stock_order_id', v_new_order_id::text, true);
+    PERFORM set_config('kloudkart.stock_actor', session_user, true);
+
     UPDATE products
     SET stock_quantity = stock_quantity - p_quantity
     WHERE products.product_id = p_product_id;
 
-    v_new_order_id := nextval('orders_order_id_seq');
+    -- Clear context so a later stock edit in the same explicit transaction is not
+    -- accidentally labelled as this sale.
+    PERFORM set_config('kloudkart.stock_reason', '', true);
+    PERFORM set_config('kloudkart.stock_note', '', true);
+    PERFORM set_config('kloudkart.stock_order_id', '', true);
+    PERFORM set_config('kloudkart.stock_actor', '', true);
 
     -- Note: total_amount is written from the price and quantity, matching the
     -- header-equals-items rule the clean part of the existing data follows.
@@ -103,20 +118,11 @@ BEGIN
             p_quantity,
             v_price);
 
-    INSERT INTO inventory_log (log_id, product_id, change_qty, reason, created_at, note, order_id)
-    VALUES (nextval('inventory_log_log_id_seq'),
-            p_product_id,
-            -p_quantity,
-            'sale',
-            now(),
-            'placed by place_order',
-            v_new_order_id);
-
     RETURN QUERY SELECT true, v_new_order_id, 'Order placed'::text;
 END;
 $$;
 
 COMMENT ON FUNCTION place_order(bigint, bigint, integer) IS
     'Places one order. Guarantees: stock never goes below zero through this function, '
-    'and the order, item and stock movement are written together or not at all. '
-    'Holds only for writers that go through this function.';
+    'and the order, item and trigger-written stock movement are written together or not at all. '
+    'Requires the audit_product_stock_change trigger from 05_stock_movement_audit.sql.';
