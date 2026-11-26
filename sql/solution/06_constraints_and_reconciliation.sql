@@ -1,7 +1,7 @@
 -- 06_constraints_and_reconciliation.sql
 -- Purpose : block new negative stock and prioritize products for physical reconciliation.
 -- Input   : run after 05_stock_movement_audit.sql.
--- Output  : a NOT VALID stock constraint and inventory_reconciliation_queue view.
+-- Output  : NOT VALID integrity constraints and inventory_reconciliation_queue view.
 -- Safety  : leaves existing quantities and log rows unchanged. Legacy negative counts
 --           remain visible for physical review; do not auto-correct them.
 -- Improvement: gives Nana a prioritized count queue without assuming the counter or log
@@ -21,6 +21,28 @@ BEGIN
     END IF;
 END;
 $$;
+
+-- Existing orders contain customer ids that do not exist. NOT VALID keeps those old
+-- rows intact, while the constraint protects new orders and prevents referenced
+-- customers from being deleted. place_order also key-share locks the customer while
+-- checking it, so deletion cannot race between validation and insertion.
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1
+        FROM pg_constraint
+        WHERE conrelid = 'orders'::regclass
+          AND conname = 'orders_customer_id_fkey'
+    ) THEN
+        ALTER TABLE orders
+            ADD CONSTRAINT orders_customer_id_fkey
+            FOREIGN KEY (customer_id) REFERENCES customers (customer_id) NOT VALID;
+    END IF;
+END;
+$$;
+
+COMMENT ON CONSTRAINT orders_customer_id_fkey ON orders IS
+    'Not validated against legacy orders with missing customers. Enforces valid customer links for new or changed references and prevents deleting a referenced customer.';
 
 COMMENT ON CONSTRAINT products_stock_nonnegative ON products IS
     'Not validated against legacy rows. Enforces non-negative stock for new or updated rows; reconcile existing negative counts physically.';

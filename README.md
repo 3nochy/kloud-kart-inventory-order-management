@@ -7,10 +7,18 @@ categories, and recording stock movements.
 ## Requirements
 
 - PostgreSQL in the existing Docker container named `kloudkart`.
+- PostgreSQL 11 or newer. The source index uses the `INCLUDE` index feature introduced
+  in PostgreSQL 11.
 - The project folder mounted in that container at `/lab`.
-- The supplied CSV files in `data/`.
+- The six supplied CSV files in `data/`. Git intentionally ignores this input bundle, so
+  it must be provided separately when someone gets a fresh clone of the project.
 - For the concurrency test: Python 3.10 or newer, `psycopg2-binary`, and a host-accessible
   `DATABASE_URL` for the same database.
+
+The race test opens 400 database connections together. Before running it, check the server
+connection limit with `SHOW max_connections;` and make sure it can admit all 400 test
+connections plus normal application and admin sessions. Changing this server setting may
+require a PostgreSQL restart.
 
 Install the Python test dependency in your virtual environment if needed:
 
@@ -123,6 +131,10 @@ LIMIT 25;
 The non-validated stock check blocks new negative quantities while leaving legacy negative
 rows for physical reconciliation. Because PostgreSQL checks updated rows, other changes to
 a legacy negative-stock product may fail until its quantity is corrected.
+
+Solution script 06 also adds a non-validated customer foreign key. It leaves the existing
+orphan orders unchanged, while requiring valid customer links for new or changed order
+references and preventing deletion of a customer who has orders.
 
 ## Project layout
 

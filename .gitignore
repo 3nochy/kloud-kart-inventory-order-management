@@ -227,4 +227,5 @@ __marimo__/
 __pycache__/
 *.pyc
 .DS_Store
+# Supplied lab CSV bundle; it contains customer records and is distributed separately.
 data/

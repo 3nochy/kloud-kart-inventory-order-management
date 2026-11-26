@@ -12,17 +12,18 @@
 --   docs/adr/ADR-004-link-log-to-order.md
 --   docs/adr/ADR-005-ids-from-sequences.md
 --   docs/adr/ADR-007-audit-every-stock-change.md
+--   docs/adr/ADR-011-protect-new-customer-links.md
 -- Summary:
 --   * A function, not a procedure: race_test.py calls it inside a SELECT, and a function
 --     is one atomic unit that either does everything or nothing.
 --   * Row lock (FOR UPDATE) rather than Serializable plus retries: the second buyer waits
 --     a few milliseconds, then re-reads the new stock and is refused cleanly. No error can
 --     reach the client, so no retry loop is needed.
---   * One product per call (the contract's signature), so there is only one lock to take
---     and no deadlock is possible. A multi-item checkout would need a second function that
---     locks products in ascending product_id order.
---   * The customer is checked before the lock is taken, to keep the lock held as briefly
---     as possible; everything between the lock and the end of the function is cheap.
+--   * One product per call (the contract's signature), so only one stock row is locked.
+--     The customer key-share lock is compatible with other orders for that customer.
+--     A multi-item checkout would need to lock products in ascending product_id order.
+--   * The customer row is key-share locked during validation. A NOT VALID foreign key
+--     also protects new orders and prevents later customer deletion from orphaning them.
 --   * Status 'pending' and log reason 'sale': see docs/adr/ADR-003-log-sale-at-placement.md.
 --
 -- Naming: RETURNS TABLE creates variables called success, order_id and message, so every
@@ -50,10 +51,14 @@ BEGIN
         RETURN;
     END IF;
 
-    -- No foreign key exists, so a missing customer would create an orphan order.
-    IF NOT EXISTS (SELECT 1
-                   FROM customers
-                   WHERE customers.customer_id = p_customer_id) THEN
+    -- Protect validation from a concurrent delete. The NOT VALID FK in script 06 also
+    -- protects other writers and prevents deleting a customer with an order.
+    PERFORM 1
+    FROM customers
+    WHERE customers.customer_id = p_customer_id
+    FOR KEY SHARE;
+
+    IF NOT FOUND THEN
         RETURN QUERY SELECT false, NULL::bigint, 'Customer not found'::text;
         RETURN;
     END IF;

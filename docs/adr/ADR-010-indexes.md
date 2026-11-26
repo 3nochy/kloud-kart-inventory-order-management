@@ -1,6 +1,7 @@
 # ADR-010: Add indexes for recurring category, report, and audit lookups
 
-- **Status:** Accepted after post-index measurements
+- **Status:** Accepted. Report/category indexes measured; customer-link index added for
+  referential checks.
 - **Date:** 2026-11-26
 - **Decision owner:** Enoch Kumi Asamoah
 
@@ -15,9 +16,10 @@ with the report.
 ## Decision
 
 Add indexes on category parent, product category, inventory-log product/date and non-NULL
-order id, and a partial order index for statuses included in the report. Run `ANALYZE`
-after creating them. The post-index plan uses the order index for a one-customer running
-total query.
+order id, a partial order index for statuses included in the report, and an unfiltered
+customer-id index to support the new customer foreign key. Run `ANALYZE` after creating
+them. The post-index plan uses the report order index for a one-customer running-total
+query.
 
 ## Alternatives considered
 
@@ -37,8 +39,10 @@ total query.
 ## Consequences
 
 - **What this buys:** source lookups have indexes aligned with the category, audit, and
-  customer/date access paths.
-- **What this costs:** storage and extra write work, especially on the inventory log.
+  customer/date access paths. Customer deletion checks can also find references without
+  scanning every order.
+- **What this costs:** storage and extra write work, especially on the inventory log and
+  order table.
   Index creation should be scheduled for setup or a maintenance window.
 - **Measured effect:** the single-customer running-total query went from about 14 ms to
   0.2 ms and the plan changed from a parallel orders scan to an index-only scan. The full
@@ -52,4 +56,6 @@ total query.
 - **Implemented:** definitions are in `sql/solution/07_indexes.sql`.
 - **Verified:** post-index plans and timings are saved in
   `results/performance/monday_report_after_indexes.txt` and
-  `results/performance/category_rollup_after_indexes.txt`.
+  `results/performance/category_rollup_after_indexes.txt`. Those measurements predate
+  the customer-id index added for the foreign key; customer-delete performance was not
+  benchmarked.

@@ -19,7 +19,7 @@
 \echo '--- 05: audit all stock changes'
 \ir solution/05_stock_movement_audit.sql
 
-\echo '--- 06: stock constraint and reconciliation queue'
+\echo '--- 06: integrity constraints and reconciliation queue'
 \ir solution/06_constraints_and_reconciliation.sql
 
 \echo '--- 07: supporting indexes'

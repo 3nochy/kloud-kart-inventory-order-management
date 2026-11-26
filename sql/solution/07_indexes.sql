@@ -2,7 +2,7 @@
 -- Purpose : support recursive category reads, linked audit queries, and per-customer
 --           report queries without changing report results.
 -- Input   : loaded database after solution scripts 01 through 06.
--- Output  : five supporting indexes on existing source tables.
+-- Output  : six supporting indexes on existing source tables.
 -- Safety  : rerunnable. Index creation can take locks and use disk space; apply during
 --           setup or a suitable maintenance window on a busy server.
 
@@ -24,6 +24,10 @@ CREATE INDEX IF NOT EXISTS orders_report_customer_date_idx
     INCLUDE (total_amount)
     WHERE total_amount IS NOT NULL
       AND lower(trim(status)) IN ('complete', 'completed', 'shipped');
+
+-- The report index above is partial, so it cannot support FK checks for every order.
+CREATE INDEX IF NOT EXISTS orders_customer_id_fk_idx
+    ON orders (customer_id);
 
 ANALYZE categories;
 ANALYZE products;

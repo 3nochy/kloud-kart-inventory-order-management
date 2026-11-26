@@ -60,10 +60,11 @@ problems measured by the scripts; they do not prove which side of a disagreement
 - **Fix and its risk:** not merged in the report. Merging is a business decision, and two people sharing an email is possible, though identical names make it unlikely.
 
 ## 6. Rows pointing at things that do not exist
-- **What is wrong:** no foreign keys. 692 item rows (689 missing orders, ₵826,327.80), 210 orders (190 missing customers, ₵665,180.61, 0.14% of order value) and 120 log rows (111 missing products, -120 units).
+- **What is wrong:** the supplied schema has no foreign keys. 692 item rows (689 missing orders, ₵826,327.80), 210 orders (190 missing customers, ₵665,180.61, 0.14% of order value) and 120 log rows (111 missing products, -120 units).
 - **How found:** `01_integrity_checks.sql`; `02_fault_diagnosis.sql`, section D.
 - **Pattern:** the missing ids sit far outside the real ranges (orders 900101-999862 against real 500001-659384; customers 999007-999997 against 100001-140420; products 99011-99999 against 5001-9023), so these look like references that never existed, not deletions.
 - **What it costs:** small in value, but any join drops them without a warning.
+- **Current treatment:** solution script 06 adds a `NOT VALID` customer foreign key. It leaves the historical orphan orders untouched, while preventing new orders from pointing to missing customers and blocking deletion of customers that have orders. Other historical orphan links remain for a separate cleanup decision.
 
 ## 7. Dates in the future
 - 16 orders (₵41,348.75) and 33 log `sale` rows (-59 units) are dated after the database clock. The last order that is not in the future is 2026-11-23.

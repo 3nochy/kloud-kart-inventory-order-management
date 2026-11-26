@@ -1,0 +1,53 @@
+# ADR-011: Preserve old orphan orders and protect new customer links
+
+- **Status:** Accepted
+- **Date:** 2026-11-26
+- **Decision owner:** Enoch Kumi Asamoah
+
+## Context
+
+The supplied database has 210 orders whose customer ids do not exist. A normal foreign
+key would fail while being validated against those old rows. `place_order` also checked a
+customer with a plain existence query, so a concurrent customer deletion could race with
+the new order insert and leave another orphan.
+
+## Decision
+
+Add `orders_customer_id_fkey` as `NOT VALID`. PostgreSQL leaves the existing orphan orders
+in place but enforces the relationship for new or changed customer references and prevents
+deleting a customer that has orders. In `place_order`, take a `FOR KEY SHARE` lock on the
+customer row during validation. That makes a concurrent deletion wait, allowing the
+function to return `Customer not found` cleanly if the customer is already gone. The
+foreign key then prevents deletion after the new order commits.
+
+## Alternatives considered
+
+### Repair every orphan and validate the foreign key
+
+- **Why attractive:** the database could certify that every order has a customer.
+- **Why rejected:** the historical rows do not identify the right customer, so inventing
+  links would corrupt history. A business-approved cleanup is needed first.
+
+### Keep only the function's existence check
+
+- **Why attractive:** no schema change is needed.
+- **Why rejected:** without a row lock and foreign key, a concurrent delete or another
+  writer could still create a new orphan order.
+
+## Consequences
+
+- **What this buys:** new order links stay valid, including when a customer deletion races
+  with order placement. Existing orphan orders remain visible and unchanged.
+- **What this costs:** a customer referenced by an order cannot be deleted until the
+  business changes or archives those orders. A changed customer reference on a legacy
+  orphan order must be set to a real customer.
+- **What it costs Nana if the delete rule is too strict:** staff may need an agreed
+  customer-archiving process instead of deleting customers with orders.
+
+## What this survives
+
+- **Implemented:** the constraint is in
+  `sql/solution/06_constraints_and_reconciliation.sql`; the key-share lock is in
+  `sql/solution/02_place_order.sql`.
+- **Not verified after this change:** the rebuilt solution and concurrent customer-delete
+  behavior. The existing race test covers product-stock contention, not customer deletion.
