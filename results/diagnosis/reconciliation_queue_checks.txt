@@ -14,4 +14,4 @@
 (10 rows)
 
 DO
---- queue assertions passed: 144 products need physical review
+--- fixed-bundle queue assertion passed: 144 products need physical review

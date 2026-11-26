@@ -24,6 +24,8 @@ DSN = os.environ.get("DATABASE_URL")
 ORDER_APP_NAME = "kloudkart_customer_delete_race_test"
 WAIT_TIMEOUT_SECONDS = 15
 MAX_INT = 2_147_483_647
+MIN_INT = -2_147_483_648
+MISSING_CUSTOMER_ID_SEARCH_SIZE = 11
 
 
 def connect(*, application_name: str | None = None, autocommit: bool = False):
@@ -103,12 +105,13 @@ def check_invalid_customer_is_rejected() -> None:
             cursor.execute(
                 """
                 SELECT candidate
-                FROM generate_series(-2147483648, -2147483638) AS candidates(candidate)
+                FROM generate_series(%s, %s) AS candidates(candidate)
                 WHERE NOT EXISTS (
                     SELECT 1 FROM customers WHERE customers.customer_id = candidate
                 )
                 LIMIT 1
-                """
+                """,
+                (MIN_INT, MIN_INT + MISSING_CUSTOMER_ID_SEARCH_SIZE - 1),
             )
             row = cursor.fetchone()
             if row is None:

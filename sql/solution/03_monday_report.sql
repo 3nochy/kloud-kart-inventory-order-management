@@ -10,14 +10,17 @@
 -- Rules   : decisions are recorded in docs/adr/ once the report has been measured.
 --           * Spend counts orders whose status means completed or shipped.
 --           * "Total spent" is orders.total_amount, the figure charged at checkout.
+--           * Status is lower(trim(status)) in ('complete', 'completed', 'shipped'). The
+--             source has 15 spellings across five meanings; pending, cancelled, and
+--             refunded orders are excluded because they are not completed kept spend.
 --           * The report is as of the date in report_settings, not the clock, so the same
 --             data always gives the same figures. The data holds 16 orders dated after
 --             2026-11-23; they are excluded until the date is moved.
 --           * Duplicate customers (same email and name) are not merged.
--- Refresh : figures are as of the last refresh. To refresh without blocking readers:
---             REFRESH MATERIALIZED VIEW CONCURRENTLY customer_spend_totals;
---             REFRESH MATERIALIZED VIEW CONCURRENTLY customer_monthly_spend;
---           The two refreshes are separate, so a read between them can mix old and new.
+-- Refresh : figures are as of the last refresh. Call refresh_monday_report(as_of_date) to
+--           update the cutoff and both materialized views in one transaction. This uses
+--           regular refreshes, so report readers can wait briefly, but they see a
+--           consistent old or new report, never a mix.
 
 -- ---------------------------------------------------------------------------
 -- Clean up, in dependency order, so the script can be rerun
@@ -197,3 +200,28 @@ SELECT monday_report.*
 FROM monday_report
 WHERE monday_report.spend_rank <= 100
 ORDER BY monday_report.spend_rank;
+
+-- Update the cutoff and both snapshots in one transaction. When CALL runs in psql's
+-- default autocommit mode, readers see the new setting and both refreshed views together.
+CREATE OR REPLACE PROCEDURE refresh_monday_report(p_as_of_date date)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    IF p_as_of_date IS NULL THEN
+        RAISE EXCEPTION 'Report as-of date is required';
+    END IF;
+
+    UPDATE report_settings
+    SET as_of_date = p_as_of_date;
+
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'report_settings has no as-of date row';
+    END IF;
+
+    REFRESH MATERIALIZED VIEW customer_spend_totals;
+    REFRESH MATERIALIZED VIEW customer_monthly_spend;
+END;
+$$;
+
+COMMENT ON PROCEDURE refresh_monday_report(date) IS
+    'Sets the report cutoff and refreshes both stored report summaries atomically. Regular refresh may briefly block readers to prevent mixed snapshots.';

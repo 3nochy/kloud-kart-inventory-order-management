@@ -28,7 +28,8 @@ one row per customer.
 
 Store the totals/rank and monthly values in materialized views so routine Monday reads do
 not rescan the raw order table for every customer. `monday_top_100` uses the stored rank;
-customer id breaks ties consistently. Refresh the materialized views after new data arrives.
+customer id breaks ties consistently. Call `refresh_monday_report(as_of_date)` after new
+data arrives; it changes the cutoff and refreshes both materialized views in one transaction.
 
 ## Alternatives considered
 
@@ -61,10 +62,10 @@ customer id breaks ties consistently. Refresh the materialized views after new d
   customers in about 0.56 seconds after adding source indexes; the top 100 took about
   0.008 seconds in that run. The monthly values and rankings are precomputed, so a normal
   read is quick.
-- **What this costs:** figures are as of the last refresh, not live. The two materialized
-  views refresh separately, so a read between refreshes can briefly combine snapshots.
-  Rebuilding with the solution script drops and recreates report objects and should happen
-  when readers are not using them.
+- **What this costs:** figures are as of the last refresh, not live. The atomic refresh uses
+  regular materialized-view refreshes, which can briefly block report readers while the
+  summaries rebuild. Rebuilding with the solution script drops and recreates report objects
+  and should happen when readers are not using them.
 - **What it costs Nana if the spend rule is wrong:** if the header amount is inaccurate,
   customer totals and rankings inherit that error. In particular, the source does not
   explain the ratios in many of the 1,748 unexplained mismatches.
@@ -73,7 +74,7 @@ customer id breaks ties consistently. Refresh the materialized views after new d
 
 ## What this survives
 
-- **Verified:** twelve independent checks passed in
+- **Verified:** thirteen independent checks passed in
   `results/performance/monday_report_checks.txt`. The full report timing and query plan are
   in `results/performance/monday_report_after_indexes.txt`.
 - **Comparison limit:** the baseline is a 500-customer sample with fewer fields, while the

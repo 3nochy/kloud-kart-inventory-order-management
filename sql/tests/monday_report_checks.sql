@@ -1,9 +1,17 @@
 -- monday_report_checks.sql
 -- Purpose : prove the Monday report agrees with the raw orders.
 -- Output  : one row per check with expected, actual and passed; every row must be true.
--- Safety  : only creates temporary views/table; all database data remains unchanged.
+-- Safety  : refreshes report summaries and creates temporary objects in a transaction
+--           that is rolled back; persistent report state remains unchanged.
 -- Note    : the counting rules are written out again below, on purpose, so the report is
 --           checked against an independent restatement instead of against itself.
+-- Status  : the supplied data has 15 spellings across five meanings. Spend deliberately
+--           includes normalized complete/completed/shipped spellings only. This expected
+--           allow-list is independent of report_orders; a symmetric difference check
+--           below fails if either rule changes without the other.
+
+\set ON_ERROR_STOP on
+BEGIN;
 
 CREATE OR REPLACE TEMP VIEW expected_orders AS
 SELECT orders.order_id,
@@ -34,7 +42,12 @@ ORDER BY customer_running_total.customer_id,
          customer_running_total.order_date DESC,
          customer_running_total.order_id DESC;
 
-BEGIN;
+-- Exercise the supported refresh path using the current cutoff. The final rollback below
+-- restores the prior report settings and materialized-view contents.
+SELECT report_settings.as_of_date AS report_as_of_date
+FROM report_settings
+\gset
+CALL refresh_monday_report(:'report_as_of_date'::date);
 
 CREATE TEMP TABLE monday_report_check_results ON COMMIT DROP AS
 WITH results AS (
@@ -51,6 +64,36 @@ WITH results AS (
     SELECT 'totals: order count equals raw orders',
            (SELECT count(*) FROM expected_orders)::numeric,
            (SELECT sum(customer_spend_totals.order_count) FROM customer_spend_totals)::numeric
+
+    UNION ALL
+    SELECT 'orders: report rows match independent status allow-list',
+           0::numeric,
+           (SELECT count(*)
+            FROM (
+                (SELECT report_orders.order_id,
+                        report_orders.customer_id,
+                        report_orders.order_date,
+                        report_orders.total_amount
+                 FROM report_orders
+                 EXCEPT
+                 SELECT expected_orders.order_id,
+                        expected_orders.customer_id,
+                        expected_orders.order_date,
+                        expected_orders.total_amount
+                 FROM expected_orders)
+                UNION ALL
+                (SELECT expected_orders.order_id,
+                        expected_orders.customer_id,
+                        expected_orders.order_date,
+                        expected_orders.total_amount
+                 FROM expected_orders
+                 EXCEPT
+                 SELECT report_orders.order_id,
+                        report_orders.customer_id,
+                        report_orders.order_date,
+                        report_orders.total_amount
+                 FROM report_orders)
+            ) AS differing_orders)::numeric
 
     UNION ALL
     SELECT 'monthly: 12 rows per customer',
@@ -137,4 +180,4 @@ SELECT check_name, expected, actual, passed
 FROM monday_report_check_results
 ORDER BY check_name;
 
-COMMIT;
+ROLLBACK;

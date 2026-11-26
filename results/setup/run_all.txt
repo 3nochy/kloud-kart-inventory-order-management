@@ -1,23 +1,19 @@
 --- 01: sequences and audit link
-psql:sql/solution/01_sequences_and_audit_link.sql:12: NOTICE:  column "order_id" of relation "inventory_log" already exists, skipping
 ALTER TABLE
 COMMENT
 CREATE SEQUENCE
-psql:sql/solution/01_sequences_and_audit_link.sql:22: NOTICE:  relation "orders_order_id_seq" already exists, skipping
  orders_sequence_position 
 --------------------------
                    999862
 (1 row)
 
 CREATE SEQUENCE
-psql:sql/solution/01_sequences_and_audit_link.sql:30: NOTICE:  relation "order_items_order_item_id_seq" already exists, skipping
  order_items_sequence_position 
 -------------------------------
                        1236559
 (1 row)
 
 CREATE SEQUENCE
-psql:sql/solution/01_sequences_and_audit_link.sql:35: NOTICE:  relation "inventory_log_log_id_seq" already exists, skipping
  inventory_log_sequence_position 
 ---------------------------------
                           982487
@@ -30,15 +26,12 @@ COMMENT
 DROP VIEW
 DROP VIEW
 DROP MATERIALIZED VIEW
-psql:sql/solution/03_monday_report.sql:27: NOTICE:  materialized view "monday_customer_report" does not exist, skipping
 DROP MATERIALIZED VIEW
 DROP MATERIALIZED VIEW
 DROP VIEW
 DROP VIEW
 DROP VIEW
 CREATE TABLE
-psql:sql/solution/03_monday_report.sql:39: NOTICE:  relation "report_settings" already exists, skipping
-psql:sql/solution/03_monday_report.sql:43: NOTICE:  relation "report_settings_single_row" already exists, skipping
 CREATE INDEX
 INSERT 0 0
 CREATE VIEW
@@ -53,11 +46,12 @@ ANALYZE
 ANALYZE
 CREATE VIEW
 CREATE VIEW
+CREATE PROCEDURE
+COMMENT
 --- 04: recursive low-stock category rollup
 CREATE FUNCTION
 COMMENT
 --- 05: audit all stock changes
-psql:sql/solution/05_stock_movement_audit.sql:15: NOTICE:  column "changed_by" of relation "inventory_log" already exists, skipping
 ALTER TABLE
 COMMENT
 CREATE FUNCTION
@@ -74,14 +68,9 @@ CREATE VIEW
 COMMENT
 --- 07: supporting indexes
 CREATE INDEX
-psql:sql/solution/07_indexes.sql:10: NOTICE:  relation "categories_parent_id_idx" already exists, skipping
-psql:sql/solution/07_indexes.sql:13: NOTICE:  relation "products_category_id_idx" already exists, skipping
 CREATE INDEX
-psql:sql/solution/07_indexes.sql:16: NOTICE:  relation "inventory_log_product_created_idx" already exists, skipping
 CREATE INDEX
-psql:sql/solution/07_indexes.sql:20: NOTICE:  relation "inventory_log_order_id_idx" already exists, skipping
 CREATE INDEX
-psql:sql/solution/07_indexes.sql:26: NOTICE:  relation "orders_report_customer_date_idx" already exists, skipping
 CREATE INDEX
 CREATE INDEX
 ANALYZE

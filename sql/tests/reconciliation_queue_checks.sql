@@ -1,8 +1,10 @@
 -- reconciliation_queue_checks.sql
 -- Purpose : confirm the physical-count queue includes the diagnosed stock disagreements.
 -- Input   : run after solution scripts 01 through 07.
--- Output  : top ten review items and an assertion against the supplied diagnosis.
+-- Output  : top ten review items and a fixed-bundle assertion against the diagnosis.
 -- Safety  : read-only.
+-- Fixture : the exact count of 144 is intentional for the checksum-pinned supplied CSVs.
+--           Update this expectation only when adopting and documenting a different bundle.
 
 \set ON_ERROR_STOP on
 
@@ -22,13 +24,15 @@ LIMIT 10;
 DO $$
 DECLARE
     v_queue_count bigint;
+    v_expected_bundle_queue_count CONSTANT bigint := 144;
 BEGIN
     SELECT count(*)
     INTO v_queue_count
     FROM inventory_reconciliation_queue;
 
-    IF v_queue_count <> 144 THEN
-        RAISE EXCEPTION 'Expected 144 products in the reconciliation queue, found %', v_queue_count;
+    IF v_queue_count <> v_expected_bundle_queue_count THEN
+        RAISE EXCEPTION 'Expected % products for the supplied bundle, found %',
+            v_expected_bundle_queue_count, v_queue_count;
     END IF;
 
     IF (SELECT min(review_priority) FROM inventory_reconciliation_queue) <> 1
@@ -38,4 +42,4 @@ BEGIN
 END;
 $$;
 
-\echo '--- queue assertions passed: 144 products need physical review'
+\echo '--- fixed-bundle queue assertion passed: 144 products need physical review'

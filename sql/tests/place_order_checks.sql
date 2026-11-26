@@ -12,7 +12,8 @@ CREATE TEMP TABLE place_order_check_fixture ON COMMIT DROP AS
 SELECT (SELECT min(customers.customer_id) FROM customers) AS customer_id,
        (SELECT min(products.product_id)
         FROM products
-        WHERE products.stock_quantity > 0) AS product_id;
+        WHERE products.stock_quantity > 0
+          AND products.stock_quantity < 2147483647) AS product_id;
 
 DO $$
 DECLARE
@@ -32,6 +33,11 @@ BEGIN
         RAISE EXCEPTION 'Checks need at least one customer and one in-stock product';
     END IF;
 
+    SELECT products.stock_quantity
+    INTO v_stock_before
+    FROM products
+    WHERE products.product_id = v_product_id;
+
     SELECT * INTO v_result
     FROM place_order(-9223372036854775808, v_product_id, 1);
     IF v_result.success OR v_result.message <> 'Customer not found' THEN
@@ -49,15 +55,11 @@ BEGIN
         RAISE EXCEPTION 'Missing-product check failed: %', row_to_json(v_result);
     END IF;
 
-    SELECT * INTO v_result FROM place_order(v_customer_id, v_product_id, 2147483647);
+    SELECT * INTO v_result
+    FROM place_order(v_customer_id, v_product_id, v_stock_before + 1);
     IF v_result.success OR v_result.message NOT LIKE 'Out of stock:%' THEN
         RAISE EXCEPTION 'Out-of-stock check failed: %', row_to_json(v_result);
     END IF;
-
-    SELECT products.stock_quantity
-    INTO v_stock_before
-    FROM products
-    WHERE products.product_id = v_product_id;
 
     SELECT * INTO v_result FROM place_order(v_customer_id, v_product_id, 1);
     IF NOT v_result.success OR v_result.message <> 'Order placed' THEN

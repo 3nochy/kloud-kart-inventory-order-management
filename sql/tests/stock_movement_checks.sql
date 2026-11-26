@@ -10,7 +10,8 @@
 BEGIN;
 
 CREATE TEMP TABLE stock_audit_fixture ON COMMIT DROP AS
-SELECT (coalesce(max(products.product_id), 0) + 2000)::integer AS product_id
+-- The fixture uses the next unused product id; the transaction rolls the row back.
+SELECT (coalesce(max(products.product_id), 0) + 1)::integer AS product_id
 FROM products;
 
 INSERT INTO products (product_id, product_name, category_id, price, stock_quantity, created_at)
