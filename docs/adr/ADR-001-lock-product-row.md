@@ -6,7 +6,7 @@
 
 ## Context
 
-Last month two orders arrived at the same moment, both read a stock level of 1, and both sold it. At PostgreSQL's default isolation level (Read Committed) each statement sees only committed data, so both buyers read the stock before either change was committed. `race_test.py` calls `place_order` inside a `SELECT` on its own autocommit connection, releases up to 400 buyers together, and counts any error that reaches the client as a failure. The schema has no CHECK on stock, and 14 products already hold negative stock (27 units in total).
+Last month two orders arrived at the same moment, both read a stock level of 1, and both sold it. At PostgreSQL's default isolation level (Read Committed) each statement sees only committed data, so both buyers read the stock before either change was committed. `race_test.py` calls `place_order` inside a `SELECT` on its own autocommit connection, releases up to 400 buyers together, and counts any error that reaches the client as a failure. The original schema had no stock check, and 14 products already held negative stock (27 units in total); solution script 06 adds a non-validated check for new and updated rows.
 
 ## Decision
 
@@ -18,7 +18,7 @@ Last month two orders arrived at the same moment, both read a stock level of 1, 
 
 - **How it would work:** a trigger on `order_items` checks the stock before each insert and raises an error if there is too little.
 - **Why it is attractive:** it cannot be bypassed by the application, and the rule lives in one place.
-- **Why rejected:** two orders arriving together each start their own transaction and fire their own copy of the trigger. Neither sees the other's uncommitted work, so both still believe the unit is available. A trigger that took the row lock would work, but then the lock is what fixes the problem. Triggers remain a good fit for the audit trail, because they cannot be forgotten; none is built here.
+- **Why rejected:** two orders arriving together each start their own transaction and fire their own copy of the trigger. Neither sees the other's uncommitted work, so both still believe the unit is available. A trigger that took the row lock would work, but then the lock is what fixes the problem. A separate stock-change trigger is now used for auditing (ADR-007); it records movements but does not replace the row lock in `place_order`.
 
 ### Alternative B: Serializable isolation with retries
 
@@ -41,6 +41,6 @@ Last month two orders arrived at the same moment, both read a stock level of 1, 
 
 ## What this survives
 
-- **Verified:** `race_test.py` passes. Test 1 ran 25 rounds of two buyers for one unit, all 25 correct. Test 2 ran 400 buyers for 50 units: 50 sold, 350 refused, none errored, 2.74 s wall clock including opening the 400 connections, on one laptop with the database in a container on the same machine. The three saved runs (`results/race_test/race_test_run_1.txt` to `race_test_run_3.txt`) all report PASSED. The refusal paths (unknown customer, quantity 0, unknown product, too many units) behave as intended (`results/race_test/place_order_checks.txt`).
+- **Verified:** the first three saved race-test runs passed on the original logging implementation. Run 4 passed after switching sales to the audit trigger: Test 1 passed all 25 one-unit races; Test 2 sold 50 of 50 units to 400 buyers, refused 350, and reported zero errors in 4.06 s including connection setup. Test 4 recorded five movements for five successful calls. The refusal paths (unknown customer, quantity 0, unknown product, too many units) also behave as intended (`results/race_test/place_order_checks.txt`).
 - **Not verified:** a real flash sale over a network, an application connection pool in front of the database, multi-item orders, and cancelled orders returning stock.
-- **The guarantee and its limit:** stock never goes below zero through `place_order`, and the order, item and stock movement are written together. This holds only for writers that go through `place_order`. A manual `UPDATE products SET stock_quantity` bypasses it, and no CHECK on stock has been added yet.
+- **The guarantee and its limit:** `place_order` keeps its stock change, order, item and trigger-written movement in one transaction. The audit trigger records ordinary direct stock updates, while the `products_stock_nonnegative` check blocks new or updated negative quantities. Because that check is `NOT VALID`, the 14 legacy negative rows remain for physical review. A direct update can still bypass the order/item workflow.

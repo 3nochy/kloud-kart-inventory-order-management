@@ -29,11 +29,11 @@ A new order is written with status `'pending'`, and a `'sale'` row with a negati
 ## Consequences
 
 - **What this buys:** the stock counter and the log change together for every sale placed through the function, and no sale exists without a log row.
-- **What this costs:** a cancelled or refunded order does not put its units back, because nothing writes a reversing row (the `return` reason exists, with 564 rows). The log will contain `sale` rows for orders that are later cancelled. In the new rows `sale` means "placed", while in the existing rows it seems to mean "completed or shipped", so a report that counts sales from the log mixes two meanings.
+- **What this costs:** a cancelled or refunded order does not put its units back automatically. An operator can now record a `return` movement with `record_stock_movement`, but no cancellation workflow calls it or changes the order status. The log will contain `sale` rows for orders that are later cancelled. In the new rows `sale` means "placed", while in the existing rows it seems to mean "completed or shipped", so a report that counts sales from the log mixes two meanings.
 - **What it costs the client if I am wrong:** products could show out of stock while units are on the shelf, and sales figures built from the log could count orders that were never fulfilled.
 - **What would make me revisit this:** building the completion and cancellation flow (cancellation should write a `return` row linked to the order), or Nana confirming that stock should be logged at shipping.
 
 ## What this survives
 
-- **Verified:** in the refusal checks a normal purchase lowered stock from 90 to 89 and wrote one `sale` row of -1 linked to the new order. Test 4 recorded 5 movements for 5 sales (`results/race_test/place_order_checks.txt`, `race_test_run_1.txt`).
-- **Not verified:** any change of status after placement, cancellations and refunds, and whether `'pending'` is the right starting status for Kloud Kart. This is an assumption, which is why the status above is Proposed. Change it to Accepted once confirmed.
+- **Verified before the trigger-based audit change:** in the saved refusal checks the sale log row was linked to its order, and the race test recorded one movement per sale.
+- **Verified after the trigger-based audit change:** run 4 of `race_test.py` recorded five movements for five successful sales; the rollback-safe place-order checks also showed one linked `sale` row. **Not verified:** cancellations/refunds and whether `'pending'` is the right starting status for Kloud Kart. This remains an assumption, which is why the status above is Proposed.

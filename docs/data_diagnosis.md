@@ -1,8 +1,9 @@
 # Data diagnosis: Kloud Kart
 
-> DRAFT. Headings to be replaced with the Evalu8 data findings template.
-> Every figure comes from `results/diagnosis/` (scripts in `sql/diagnosis/`).
-> Total order value in the data is ₵487,063,959.81 across 159,384 orders.
+**Scope:** read-only checks of the supplied extract, run with the scripts in `sql/diagnosis/`.
+Every figure below comes from the saved outputs in `results/diagnosis/`. The extract has
+total order value of ₵487,063,959.81 across 159,384 orders. These checks identify the
+problems measured by the scripts; they do not prove which side of a disagreement is true.
 
 ## Ranking (by cost to a number Nana uses, not by row count)
 
@@ -19,16 +20,16 @@
 ## 1. Stock counter disagrees with the stock log
 - **What is wrong:** no constraint ties `products.stock_quantity` to the sum of `inventory_log.change_qty`. 144 of 4,023 products disagree. The counter is below the log for 122 and above for 22; net -2,375 units (₵-3,656,269.44), gross 2,553 units (₵3,865,699.34). 14 products have negative stock (-27 units, ₵-20,627.76).
 - **How found:** `sql/diagnosis/02_fault_diagnosis.sql`, section E (view `stock_vs_log`).
-- **What it costs:** Nana cannot trust stock counts, and `place_order` refuses or allows sales based on the counter. For 13 of the 14 negative products the log agrees with the counter, so those are real oversells, not a counting error.
+- **What it costs:** Nana cannot trust stock counts, and `place_order` refuses or allows sales based on the counter. For 13 of the 14 negative products the log agrees with the counter, which is evidence of a stock deficit; a physical count is still needed to confirm the real quantity.
 - **What explains it:** for 39 products the gap equals minus the units on log rows noted "recount, not applied" (all 40 such rows are `correction` rows): the log recorded a recount the counter never received. 87 products have no candidate explanation.
-- **Fix and its risk:** do not auto-correct. A physical count of the 87 decides whether the counter or the log is right. Add `CHECK (stock_quantity >= 0)` as `NOT VALID`. Risk of correcting without a count: one wrong number replaces another.
+- **Fix and its risk:** do not auto-correct. Use `inventory_reconciliation_queue` to prioritize a physical count of the 87 unexplained products; the view does not choose whether the counter or log is right. A `NOT VALID` check now blocks new negative stock while leaving legacy rows for count and correction. Until those rows are corrected, other updates to a negative-stock product may be rejected by the check.
 - **Cannot verify:** which side is right for the 87.
 
 ## 2. Order status written 15 ways
 - **What is wrong:** `orders.status` is free text. 15 spellings mean five things: completed, pending, shipped, refunded, cancelled.
 - **How found:** `GROUP BY status` in `01_integrity_checks.sql`; collapsed in `02_fault_diagnosis.sql`, section A.
 - **What it costs:** a report filtering `status = 'completed'` sees 22,091 of 111,351 completed orders (19.8%). Completed orders are worth ₵339,609,366.03.
-- **Fix and its risk:** normalise to five values and add a CHECK. Risk: reading "complete" and "completed" as the same thing is an assumption; nothing in the data contradicts it.
+- **Current treatment:** the report maps known spellings to their meaning when reading; it does not rewrite the stored history. A canonical write rule and a status constraint still need a business decision. Risk: reading "complete" and "completed" as the same thing is an assumption; nothing in the data contradicts it.
 
 ## 3. Order total disagrees with its items
 - **What is wrong:** `orders.total_amount` is a stored copy of what the items add up to, with nothing forcing agreement. 2,426 orders (1.5%) disagree; gross gap ₵5,214,733.92, net ₵-3,477,551.62.
@@ -50,7 +51,7 @@
 - **What is wrong:** `categories.parent_id` has no foreign key. Categories 9001 and 9002 are each other's parent (a cycle) and 9003 points at 8999, which does not exist. Six products (440 units) sit under them. A further 31 products with 3,112 units (₵3,281,371.20 of stock) have no category.
 - **How found:** `02_fault_diagnosis.sql`, section F (walk down from the roots, and walk up with a depth cap).
 - **What it costs:** a low-stock rollup starting at the roots never sees these 37 products.
-- **Fix and its risk:** the rollup shows "unattached" and "uncategorised" buckets so nothing disappears. The correct parent for 9001-9003 is a business decision, so it is left alone.
+- **Fix and its risk:** the recursive rollup shows cyclic/unreachable and uncategorised buckets so product stock does not disappear. The correct parent for 9001-9003 is a business decision, so it is left alone.
 
 ## 5. The same customer stored more than once
 - **What is wrong:** `customers.email` is not unique. 533 emails appear on 1,068 rows (535 extra), and in all 533 groups the names are identical.
@@ -78,4 +79,4 @@
 1. Which side is right for the 87 products with no explanation.
 2. What produced the four exact ratios in 1,605 totals.
 3. The 25 orders with item totals of zero, and the 118 uncharacterised mismatches.
-4. Whether stock is logged at placement or at completion: the data suggests completion, but the log has no `order_id`, so it cannot be proven.
+4. Whether historical sales were logged at placement or at completion: the original log rows have no reliable `order_id` link, so timing cannot be proven from this extract. New sale movements are linked to their orders by the solution.

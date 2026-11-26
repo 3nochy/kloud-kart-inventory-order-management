@@ -10,7 +10,7 @@
 
 ## Decision
 
-Three sequences supply the new ids. The orders sequence starts at the highest order id found in either `orders` or `order_items` (999,862), so the first new order is 999,863. The other two start at their table's current maximum.
+Three sequences supply the new ids. The orders sequence starts at the highest order id found in `orders`, `order_items`, or linked `inventory_log` rows (999,862 in the supplied data), so the first new order is 999,863. The other two start at their table's current maximum.
 
 ## Alternatives considered
 
