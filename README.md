@@ -56,6 +56,18 @@ docker exec -w /lab -i kloudkart psql -U postgres -v ON_ERROR_STOP=1 -f sql/test
 docker exec -w /lab -i kloudkart psql -U postgres -v ON_ERROR_STOP=1 -f sql/tests/reconciliation_queue_checks.sql
 ```
 
+Check that customer links reject missing customers and handle a delete/order race using
+disposable customer and product fixtures:
+
+```sh
+set -o pipefail
+python customer_link_race_test.py | tee results/race_test/customer_link_checks.txt
+```
+
+The script needs the same `DATABASE_URL` as `race_test.py` and a database login that can
+see its own sessions in `pg_stat_activity`. It removes its fixtures and rolls back its
+test orders and stock changes.
+
 Run the unmodified concurrency test from the project root with your virtual environment
 active and `DATABASE_URL` set in the host terminal. A URL may look like this:
 
@@ -68,7 +80,8 @@ Use your own connection details; do not commit the URL or password. To save a ra
 run, pipe it to a numbered result file, for example:
 
 ```sh
-python race_test.py | tee results/race_test/race_test_run_4.txt
+set -o pipefail
+python race_test.py | tee results/race_test/race_test_run_6.txt
 ```
 
 ## Use the reports
@@ -142,6 +155,8 @@ references and preventing deletion of a customer who has orders.
 - `sql/solution/` — ordered schema changes, functions, triggers, report objects, and indexes.
 - `sql/tests/` — report, order, movement, and timing checks.
 - `sql/baseline/` — slow report shape used for the before measurement.
+- `customer_link_race_test.py` — checks customer foreign-key enforcement and the
+  delete/order race with disposable fixtures.
 - `results/` — saved diagnosis, race-test, and performance output.
 - `docs/data_diagnosis.md` — risk-ranked diagnosis of the supplied data.
 - `docs/key_decisions.md` and `docs/adr/` — project decisions and supporting records.

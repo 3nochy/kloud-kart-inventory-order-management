@@ -1,0 +1,4 @@
+PASS — database rejected an order linked to a missing customer
+PASS — database refused to delete a customer with an order
+PASS — concurrent delete returned Customer not found with no order or stock change
+PASSED — all customer-link checks completed and fixtures were removed
