@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kloud Kart Flash-Sale Day Simulation</title>
+  <style>
+    :root { color-scheme: light; --ink:#172235; --muted:#64748b; --line:#dbe3ef;
+      --paper:#f4f7fb; --card:#fff; --blue:#2457d6; --green:#138a5b; --red:#c43d4b; }
+    * { box-sizing:border-box; } body { margin:0; background:var(--paper); color:var(--ink);
+      font:15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif; }
+    main { max-width:1100px; margin:0 auto; padding:32px 20px 56px; }
+    header { background:#132544; color:white; padding:28px; border-radius:18px; }
+    header h1 { margin:0 0 6px; font-size:clamp(25px,4vw,38px); }
+    header p { color:#d4dff2; margin:0; }
+    .badge { display:inline-block; margin-top:18px; padding:6px 11px; border-radius:99px;
+      background:#173d35; color:#b5f1d5; font-size:12px; font-weight:800; letter-spacing:.06em; }
+    .badge.fail { background:#542a32; color:#ffd0d2; }
+    .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:14px; margin:18px 0; }
+    .card { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:18px; }
+    .metric { font-size:29px; line-height:1.15; font-weight:750; margin:5px 0; }
+    .label { color:var(--muted); font-size:13px; } h2 { margin:28px 0 10px; font-size:21px; }
+    table { border-collapse:collapse; width:100%; background:var(--card); border-radius:12px;
+      overflow:hidden; border:1px solid var(--line); } th,td { text-align:left; padding:10px 12px;
+      border-bottom:1px solid var(--line); vertical-align:top; } th { background:#edf2fa; font-size:13px; }
+    tr:last-child td { border-bottom:0; } .pass { color:var(--green); font-weight:800; }
+    .fail { color:var(--red); font-weight:800; } .bar { display:flex; height:22px; overflow:hidden;
+      border-radius:99px; background:#e7edf6; margin:12px 0 6px; }
+    .sold { width:12.5%; background:var(--green); }
+    .refused { width:87.5%; background:#e4a83c; }
+    .errored { width:0%; background:var(--red); }
+    .legend { display:flex; gap:18px; color:var(--muted); font-size:13px; }
+    .note { color:var(--muted); font-size:13px; } code { background:#edf2fa; padding:2px 5px; border-radius:4px; }
+    @media(max-width:600px) { main { padding:16px 12px 36px; } header { padding:21px; } th,td { padding:8px; } }
+  </style>
+</head>
+<body><main>
+  <header>
+    <h1>Kloud Kart Flash-Sale Day Simulation</h1>
+    <p>Repeatable lab run · 400 buyers · 50 units ·
+       Simulation Electronics [96a20d428260] / Simulation Phones [96a20d428260] / Simulation Phone Accessories [96a20d428260] / Simulation Cases [96a20d428260]</p>
+    <span class="badge ">ALL CHECKS PASSED</span>
+  </header>
+
+  <section class="grid" aria-label="Simulation scorecard">
+    <article class="card"><div class="label">Orders accepted</div><div class="metric">50</div>
+      <div class="label">of 400 attempts</div></article>
+    <article class="card"><div class="label">Out-of-stock replies</div><div class="metric">350</div>
+      <div class="label">clear refusals, with no order</div></article>
+    <article class="card"><div class="label">Ending stock</div><div class="metric">0</div>
+      <div class="label">logged net: 0</div></article>
+    <article class="card"><div class="label">Flash-sale elapsed</div><div class="metric">2.33s</div>
+      <div class="label">median call 744.3 ms · p95 1166.0 ms</div></article>
+    <article class="card"><div class="label">Report refresh</div><div class="metric">1.22s</div>
+      <div class="label">rolled back after the report snapshot</div></article>
+    <article class="card"><div class="label">Starting stock/log differences</div><div class="metric">144</div>
+      <div class="label">from the reconciliation queue</div></article>
+  </section>
+
+  <h2>Buyer outcomes</h2>
+  <div class="bar" role="img" aria-label="Accepted, out-of-stock, and error buyer outcomes">
+    <div class="sold"></div><div class="refused"></div><div class="errored"></div>
+  </div>
+  <div class="legend"><span>■ Accepted: 50</span>
+    <span>■ Out of stock: 350</span>
+    <span>Errors: 0</span></div>
+
+  <h2>Starting data-quality signals</h2>
+  <p class="note">These are measurements from the loaded lab data before fixtures were added.
+     The simulation reports them; it does not guess which side is correct or alter them.</p>
+  <table><thead><tr><th>Signal</th><th>Rows or values</th></tr></thead><tbody>
+    <tr><td>Products with counter/log differences</td><td>144</td></tr>
+    <tr><td>Orders whose header differs from item totals</td><td>2426</td></tr>
+    <tr><td>Orders linked to a missing customer</td><td>210</td></tr>
+    <tr><td>Orders with a null customer id</td><td>0</td></tr>
+    <tr><td>Distinct stored status spellings</td><td>15</td></tr>
+  </tbody></table>
+
+  <h2>Inventory and category rollup</h2>
+  <p class="note">The opening restock and each sale were written to the movement log. The recursive
+     rollup follows the full nested path; the threshold is 5 units.</p>
+  <table><thead><tr><th>Category path</th><th>Stock units</th><th>Low-stock products</th>
+    <th>Low-stock units</th><th>Threshold</th></tr></thead><tbody><tr><td>Simulation Electronics [96a20d428260]</td><td>0</td><td>1</td><td>0</td><td>5</td></tr>
+<tr><td>Simulation Electronics [96a20d428260] / Simulation Phones [96a20d428260]</td><td>0</td><td>1</td><td>0</td><td>5</td></tr>
+<tr><td>Simulation Electronics [96a20d428260] / Simulation Phones [96a20d428260] / Simulation Phone Accessories [96a20d428260]</td><td>0</td><td>1</td><td>0</td><td>5</td></tr>
+<tr><td>Simulation Electronics [96a20d428260] / Simulation Phones [96a20d428260] / Simulation Phone Accessories [96a20d428260] / Simulation Cases [96a20d428260]</td><td>0</td><td>1</td><td>0</td><td>5</td></tr></tbody></table>
+  <p class="note">Audit movements: 1 opening restock,
+     50 sale rows, 50
+     linked to orders. Reconciliation-queue entries for the test product:
+     0.</p>
+
+  <h2>Monday report preview</h2>
+  <p>The simulation temporarily marked successful test orders completed, refreshed the report
+     through 2026-11-27, and read only its synthetic customers. The
+     transaction was rolled back, so the lab report cutoff and stored summaries were preserved.</p>
+  <div class="grid">
+    <article class="card"><div class="label">Synthetic customers shown</div><div class="metric">400</div></article>
+    <article class="card"><div class="label">Completed simulated orders</div><div class="metric">50</div></article>
+    <article class="card"><div class="label">Simulated spend</div><div class="metric">GHS 5,000.00</div></article>
+    <article class="card"><div class="label">Spend in report's current month</div><div class="metric">GHS 5,000.00</div></article>
+    <article class="card"><div class="label">Synthetic customers in top 100</div><div class="metric">0</div>
+      <div class="label">report read: 0.044s</div></article>
+    <article class="card"><div class="label">Running totals matched</div><div class="metric">50</div>
+      <div class="label">final balances sum to GHS 5,000.00</div></article>
+  </div>
+
+  <h2>Checks</h2>
+  <table><thead><tr><th>Invariant</th><th>Result</th></tr></thead><tbody><tr><td>accepted orders equal the available stock or buyer count</td><td class="pass">PASS</td></tr>
+<tr><td>every refused buyer received an out-of-stock response</td><td class="pass">PASS</td></tr>
+<tr><td>no buyer call errored</td><td class="pass">PASS</td></tr>
+<tr><td>ending stock equals opening stock less successful sales</td><td class="pass">PASS</td></tr>
+<tr><td>audit log stock movement totals equal ending stock</td><td class="pass">PASS</td></tr>
+<tr><td>each successful sale has one order-linked movement</td><td class="pass">PASS</td></tr>
+<tr><td>sale movement count equals successful sales</td><td class="pass">PASS</td></tr>
+<tr><td>the simulated product is absent from the reconciliation queue</td><td class="pass">PASS</td></tr>
+<tr><td>recursive rollup includes the complete four-level path</td><td class="pass">PASS</td></tr>
+<tr><td>root rollup flags the simulated product at the low-stock threshold</td><td class="pass">PASS</td></tr>
+<tr><td>Monday report includes all simulated customers and completed sales</td><td class="pass">PASS</td></tr>
+<tr><td>report refresh transaction was rolled back</td><td class="pass">PASS</td></tr>
+<tr><td>all disposable fixtures were removed</td><td class="pass">PASS</td></tr></tbody></table>
+
+  <h2>Event timeline</h2>
+  <table><thead><tr><th>Stage</th><th>Time</th><th>What happened</th></tr></thead>
+    <tbody><tr><td>Create fixtures and opening stock</td><td>0.11s</td><td>400 synthetic customers and the four-level test category</td></tr>
+<tr><td>Flash sale</td><td>2.34s</td><td>400 simultaneous order attempts</td></tr>
+<tr><td>Complete successful test orders</td><td>0.03s</td><td>50 orders advanced to completed for report preview</td></tr>
+<tr><td>Audit and category rollup</td><td>0.78s</td><td>Check stock movements, reconciliation queue, and all category levels</td></tr>
+<tr><td>Monday report preview</td><td>1.27s</td><td>Refresh and read synthetic customers inside a rolled-back transaction</td></tr>
+<tr><td>Fixture cleanup</td><td>0.07s</td><td>Remove test customers, product, categories, orders, and stock movements</td></tr></tbody></table>
+
+  <h2>Run details</h2>
+  <p class="note">Run id <code>96a20d428260</code> · seed 20261127 ·
+     generated 2026-11-27T09:56:47+00:00. All simulation fixtures were removed when the run finished.</p>
+  <p class="note">PostgreSQL sequence counters still advance, so the removed orders leave normal
+     gaps in generated ids. If the process is forcibly stopped, recovery instructions are in
+     <code>docs/flash_sale_simulation.md</code>.</p>
+  <p class="note">This is a local lab result, not a production-capacity guarantee. The 400-buyer
+     case opens 400 database connections and should only run where PostgreSQL has room for them.</p>
+</main></body></html>
