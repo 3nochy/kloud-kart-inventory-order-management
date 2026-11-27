@@ -1,0 +1,111 @@
+Timing is on.
+--- category rollup (default threshold: 5 units)
+    bucket_type    |                        category_path                         | depth | product_count | stock_units | low_stock_product_count | low_stock_units | unknown_stock_count 
+-------------------+--------------------------------------------------------------+-------+---------------+-------------+-------------------------+-----------------+---------------------
+ category_tree     | Baby and Toys                                                |     0 |           321 |       16756 |                     139 |             228 |                   0
+ category_tree     | Baby and Toys / Baby                                         |     1 |           186 |       10815 |                      81 |             128 |                   0
+ category_tree     | Baby and Toys / Baby / Baby Care                             |     2 |            58 |        3433 |                      25 |              45 |                   0
+ category_tree     | Baby and Toys / Baby / Baby Feeding                          |     2 |            61 |        3727 |                      22 |              44 |                   0
+ category_tree     | Baby and Toys / Baby / Diapers                               |     2 |            67 |        3655 |                      34 |              39 |                   0
+ category_tree     | Baby and Toys / Toys                                         |     1 |           135 |        5941 |                      58 |             100 |                   0
+ category_tree     | Baby and Toys / Toys / Educational Toys                      |     2 |            66 |        2934 |                      29 |              45 |                   0
+ category_tree     | Baby and Toys / Toys / Outdoor Toys                          |     2 |            69 |        3007 |                      29 |              55 |                   0
+ orphan_tree       | Clearance                                                    |     0 |             0 |           0 |                       0 |               0 |                   0
+ category_tree     | Electronics                                                  |     0 |          1238 |       77308 |                     521 |             906 |                   0
+ category_tree     | Electronics / Audio                                          |     1 |           322 |       21228 |                     138 |             246 |                   0
+ category_tree     | Electronics / Audio / Headphones                             |     2 |           204 |       13910 |                      85 |             172 |                   0
+ category_tree     | Electronics / Audio / Headphones / In-Ear                    |     3 |            75 |        5057 |                      31 |              49 |                   0
+ category_tree     | Electronics / Audio / Headphones / Over-Ear                  |     3 |            63 |        3436 |                      30 |              79 |                   0
+ category_tree     | Electronics / Audio / Headphones / True Wireless             |     3 |            66 |        5417 |                      24 |              44 |                   0
+ category_tree     | Electronics / Audio / Soundbars                              |     2 |            52 |        3449 |                      18 |              30 |                   0
+ category_tree     | Electronics / Audio / Speakers                               |     2 |            66 |        3869 |                      35 |              44 |                   0
+ category_tree     | Electronics / Computing                                      |     1 |           391 |       25551 |                     159 |             276 |                   0
+ category_tree     | Electronics / Computing / Computer Accessories               |     2 |           200 |       13621 |                      83 |             138 |                   0
+ category_tree     | Electronics / Computing / Computer Accessories / Keyboards   |     3 |            69 |        5498 |                      29 |              38 |                   0
+ category_tree     | Electronics / Computing / Computer Accessories / Laptop Bags |     3 |            58 |        4447 |                      19 |              50 |                   0
+ category_tree     | Electronics / Computing / Computer Accessories / Mice        |     3 |            73 |        3676 |                      35 |              50 |                   0
+ category_tree     | Electronics / Computing / Desktops                           |     2 |            80 |        4498 |                      29 |              53 |                   0
+ category_tree     | Electronics / Computing / Laptops                            |     2 |            57 |        3779 |                      22 |              27 |                   0
+ category_tree     | Electronics / Computing / Monitors                           |     2 |            54 |        3653 |                      25 |              58 |                   0
+ category_tree     | Electronics / Phones                                         |     1 |           395 |       23475 |                     170 |             293 |                   0
+ category_tree     | Electronics / Phones / Feature Phones                        |     2 |            63 |        3830 |                      29 |              43 |                   0
+ category_tree     | Electronics / Phones / Phone Accessories                     |     2 |           265 |       17064 |                     114 |             212 |                   0
+ category_tree     | Electronics / Phones / Phone Accessories / Cases             |     3 |            71 |        4704 |                      34 |              77 |                   0
+ category_tree     | Electronics / Phones / Phone Accessories / Chargers          |     3 |            62 |        4482 |                      24 |              58 |                   0
+ category_tree     | Electronics / Phones / Phone Accessories / Power Banks       |     3 |            70 |        3737 |                      33 |              50 |                   0
+ category_tree     | Electronics / Phones / Phone Accessories / Screen Protectors |     3 |            62 |        4141 |                      23 |              27 |                   0
+ category_tree     | Electronics / Phones / Smartphones                           |     2 |            67 |        2581 |                      27 |              38 |                   0
+ category_tree     | Electronics / Television                                     |     1 |           130 |        7054 |                      54 |              91 |                   0
+ category_tree     | Electronics / Television / Smart TVs                         |     2 |            63 |        4172 |                      24 |              43 |                   0
+ category_tree     | Electronics / Television / TV Accessories                    |     2 |            67 |        2882 |                      30 |              48 |                   0
+ category_tree     | Fashion                                                      |     0 |           676 |       40840 |                     302 |             570 |                   0
+ category_tree     | Fashion / Children                                           |     1 |           136 |        6618 |                      63 |             104 |                   0
+ category_tree     | Fashion / Children / Kids Clothing                           |     2 |            64 |        3226 |                      30 |              49 |                   0
+ category_tree     | Fashion / Children / Kids Footwear                           |     2 |            72 |        3392 |                      33 |              55 |                   0
+ category_tree     | Fashion / Men                                                |     1 |           256 |       16335 |                     118 |             251 |                   0
+ category_tree     | Fashion / Men / Men Accessories                              |     2 |            61 |        3226 |                      28 |              52 |                   0
+ category_tree     | Fashion / Men / Men Footwear                                 |     2 |            64 |        3697 |                      30 |              65 |                   0
+ category_tree     | Fashion / Men / Shirts                                       |     2 |            74 |        4788 |                      37 |              89 |                   0
+ category_tree     | Fashion / Men / Trousers                                     |     2 |            57 |        4624 |                      23 |              45 |                   0
+ category_tree     | Fashion / Women                                              |     1 |           284 |       17887 |                     121 |             215 |                   0
+ category_tree     | Fashion / Women / Dresses                                    |     2 |            68 |        3403 |                      31 |              73 |                   0
+ category_tree     | Fashion / Women / Women Accessories                          |     2 |            64 |        5154 |                      20 |              46 |                   0
+ category_tree     | Fashion / Women / Women Bags                                 |     2 |            75 |        4660 |                      35 |              46 |                   0
+ category_tree     | Fashion / Women / Women Footwear                             |     2 |            77 |        4670 |                      35 |              50 |                   0
+ category_tree     | Flash Sale Items                                             |     0 |             0 |           0 |                       0 |               0 |                   0
+ category_tree     | Flash Sale Items / Back to School                            |     1 |             0 |           0 |                       0 |               0 |                   0
+ category_tree     | Groceries                                                    |     0 |           770 |       51789 |                     322 |             540 |                   0
+ category_tree     | Groceries / Beverages                                        |     1 |           268 |       18085 |                     107 |             170 |                   0
+ category_tree     | Groceries / Beverages / Juices                               |     2 |            66 |        4833 |                      26 |              40 |                   0
+ category_tree     | Groceries / Beverages / Soft Drinks                          |     2 |            83 |        5679 |                      32 |              63 |                   0
+ category_tree     | Groceries / Beverages / Tea and Coffee                       |     2 |            62 |        4329 |                      27 |              30 |                   0
+ category_tree     | Groceries / Beverages / Water                                |     2 |            57 |        3244 |                      22 |              37 |                   0
+ category_tree     | Groceries / Household                                        |     1 |           240 |       15660 |                     108 |             196 |                   0
+ category_tree     | Groceries / Household / Cleaning                             |     2 |           131 |        7709 |                      62 |             117 |                   0
+ category_tree     | Groceries / Household / Cleaning / Detergents                |     3 |            71 |        4159 |                      30 |              70 |                   0
+ category_tree     | Groceries / Household / Cleaning / Disinfectants             |     3 |            60 |        3550 |                      32 |              47 |                   0
+ category_tree     | Groceries / Household / Paper Goods                          |     2 |            47 |        3196 |                      23 |              47 |                   0
+ category_tree     | Groceries / Household / Toiletries                           |     2 |            62 |        4755 |                      23 |              32 |                   0
+ category_tree     | Groceries / Staples                                          |     1 |           262 |       18044 |                     107 |             174 |                   0
+ category_tree     | Groceries / Staples / Flour                                  |     2 |            73 |        4488 |                      35 |              54 |                   0
+ category_tree     | Groceries / Staples / Oil                                    |     2 |            60 |        4569 |                      21 |              35 |                   0
+ category_tree     | Groceries / Staples / Rice                                   |     2 |            75 |        5338 |                      30 |              56 |                   0
+ category_tree     | Groceries / Staples / Sugar and Salt                         |     2 |            54 |        3649 |                      21 |              29 |                   0
+ category_tree     | Health and Beauty                                            |     0 |           376 |       25969 |                     158 |             317 |                   0
+ category_tree     | Health and Beauty / Personal Care                            |     1 |           255 |       17375 |                     113 |             223 |                   0
+ category_tree     | Health and Beauty / Personal Care / Haircare                 |     2 |            81 |        7191 |                      33 |              70 |                   0
+ category_tree     | Health and Beauty / Personal Care / Oral Care                |     2 |            68 |        5349 |                      29 |              52 |                   0
+ category_tree     | Health and Beauty / Personal Care / Skincare                 |     2 |           106 |        4835 |                      51 |             101 |                   0
+ category_tree     | Health and Beauty / Personal Care / Skincare / Moisturisers  |     3 |            50 |        2330 |                      21 |              49 |                   0
+ category_tree     | Health and Beauty / Personal Care / Skincare / Sunscreen     |     3 |            56 |        2505 |                      30 |              52 |                   0
+ category_tree     | Health and Beauty / Wellness                                 |     1 |           121 |        8594 |                      45 |              94 |                   0
+ category_tree     | Health and Beauty / Wellness / First Aid                     |     2 |            62 |        4017 |                      27 |              56 |                   0
+ category_tree     | Health and Beauty / Wellness / Supplements                   |     2 |            59 |        4577 |                      18 |              38 |                   0
+ category_tree     | Home Appliances                                              |     0 |           599 |       40124 |                     228 |             358 |                   0
+ category_tree     | Home Appliances / Cooling                                    |     1 |           183 |       12920 |                      65 |             111 |                   0
+ category_tree     | Home Appliances / Cooling / Air Conditioners                 |     2 |            57 |        4342 |                      16 |              20 |                   0
+ category_tree     | Home Appliances / Cooling / Fans                             |     2 |            68 |        2843 |                      27 |              51 |                   0
+ category_tree     | Home Appliances / Cooling / Refrigerators                    |     2 |            58 |        5735 |                      22 |              40 |                   0
+ category_tree     | Home Appliances / Kitchen                                    |     1 |           277 |       18838 |                     113 |             166 |                   0
+ category_tree     | Home Appliances / Kitchen / Blenders                         |     2 |            76 |        4950 |                      33 |              37 |                   0
+ category_tree     | Home Appliances / Kitchen / Cookers                          |     2 |            51 |        3466 |                      21 |              37 |                   0
+ category_tree     | Home Appliances / Kitchen / Kettles                          |     2 |            74 |        4545 |                      30 |              34 |                   0
+ category_tree     | Home Appliances / Kitchen / Microwaves                       |     2 |            76 |        5877 |                      29 |              58 |                   0
+ category_tree     | Home Appliances / Laundry                                    |     1 |           139 |        8366 |                      50 |              81 |                   0
+ category_tree     | Home Appliances / Laundry / Irons                            |     2 |            70 |        4082 |                      25 |              40 |                   0
+ category_tree     | Home Appliances / Laundry / Washing Machines                 |     2 |            69 |        4284 |                      25 |              41 |                   0
+ cycle_unreachable | Unattached category assignments                              |     0 |             6 |         440 |                       3 |               8 |                   0
+ uncategorized     | Uncategorized products                                       |     0 |            37 |        3112 |                      12 |              12 |                   0
+(94 rows)
+
+Time: 742.613 ms
+--- execution plan and measured time
+                                                            QUERY PLAN                                                            
+----------------------------------------------------------------------------------------------------------------------------------
+ Function Scan on low_stock_by_category  (cost=0.25..10.25 rows=1000 width=148) (actual time=633.087..633.091 rows=94.00 loops=1)
+   Buffers: shared hit=152
+ Planning Time: 0.023 ms
+ Execution Time: 633.106 ms
+(4 rows)
+
+Time: 633.497 ms

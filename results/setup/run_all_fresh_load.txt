@@ -1,0 +1,80 @@
+--- 01: sequences and audit link
+ALTER TABLE
+COMMENT
+CREATE SEQUENCE
+ orders_sequence_position 
+--------------------------
+                   999862
+(1 row)
+
+CREATE SEQUENCE
+ order_items_sequence_position 
+-------------------------------
+                       1236559
+(1 row)
+
+CREATE SEQUENCE
+ inventory_log_sequence_position 
+---------------------------------
+                          982487
+(1 row)
+
+--- 02: concurrency-safe order placement
+CREATE FUNCTION
+COMMENT
+--- 03: Monday customer-spending report
+DROP VIEW
+DROP VIEW
+DROP MATERIALIZED VIEW
+DROP MATERIALIZED VIEW
+DROP MATERIALIZED VIEW
+DROP VIEW
+DROP VIEW
+DROP VIEW
+CREATE TABLE
+CREATE INDEX
+INSERT 0 1
+CREATE VIEW
+CREATE VIEW
+CREATE VIEW
+SELECT 485040
+CREATE INDEX
+SELECT 40420
+CREATE INDEX
+CREATE INDEX
+ANALYZE
+ANALYZE
+CREATE VIEW
+CREATE VIEW
+CREATE PROCEDURE
+COMMENT
+--- 04: recursive low-stock category rollup
+CREATE FUNCTION
+COMMENT
+--- 05: audit all stock changes
+ALTER TABLE
+COMMENT
+CREATE FUNCTION
+DROP TRIGGER
+CREATE TRIGGER
+CREATE FUNCTION
+COMMENT
+--- 06: integrity constraints and reconciliation queue
+DO
+DO
+COMMENT
+COMMENT
+CREATE VIEW
+COMMENT
+--- 07: supporting indexes
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+ANALYZE
+ANALYZE
+ANALYZE
+ANALYZE
+--- Kloud Kart solution objects installed

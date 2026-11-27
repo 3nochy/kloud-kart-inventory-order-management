@@ -36,8 +36,9 @@ pip install -r requirements.txt
 
 ## Load a fresh lab database
 
-Run these from the project root. **`schema.sql` drops and recreates the project tables.**
-Use it only when you intend to reset this lab database and reload the supplied data.
+Run these from the project root. **`schema.sql` drops and recreates the project tables,
+report cutoff, and solution id sequences.** Use it only when you intend to reset this lab
+database and reload the supplied data.
 
 ```sh
 docker exec -w /lab -i kloudkart psql -U postgres -v ON_ERROR_STOP=1 -f schema.sql

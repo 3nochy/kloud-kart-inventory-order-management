@@ -1,0 +1,25 @@
+BEGIN
+CREATE VIEW
+CREATE VIEW
+CREATE VIEW
+CALL
+SELECT 13
+DO
+                             check_name                             |   expected   |    actual    | passed 
+--------------------------------------------------------------------+--------------+--------------+--------
+ monthly: 12 rows per customer                                      |       485040 |       485040 | t
+ monthly: spend equals raw orders inside the window                 | 350979502.87 | 350979502.87 | t
+ orders: report rows match independent status allow-list            |            0 |            0 | t
+ ranking: every customer has a distinct rank                        |        40420 |        40420 | t
+ running total: customers whose last value differs from total spent |            0 |            0 | t
+ top 100: customers outside it who spent more than its last place   |            0 |            0 | t
+ top 100: exactly 100 rows                                          |          100 |          100 | t
+ totals: one row per customer                                       |        40420 |        40420 | t
+ totals: order count equals raw orders                              |       124030 |       124030 | t
+ totals: total spent equals raw orders                              | 380098310.27 | 380098310.27 | t
+ wide report: newest month column equals raw spend in that month    |            0 |            0 | t
+ wide report: oldest month column equals raw spend in that month    |  13246119.85 |  13246119.85 | t
+ wide report: one row per customer                                  |        40420 |        40420 | t
+(13 rows)
+
+ROLLBACK

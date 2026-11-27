@@ -4,6 +4,13 @@
 
 DROP TABLE IF EXISTS order_items, orders, inventory_log, products, customers, categories CASCADE;
 
+-- The report cutoff and application-id sequences are solution-owned objects, so dropping
+-- the source tables does not remove them automatically. Clear them for a deterministic lab reset.
+DROP TABLE IF EXISTS report_settings CASCADE;
+DROP SEQUENCE IF EXISTS orders_order_id_seq,
+                       order_items_order_item_id_seq,
+                       inventory_log_log_id_seq;
+
 CREATE TABLE categories (
     category_id     integer PRIMARY KEY,
     category_name   text,
