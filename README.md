@@ -15,10 +15,11 @@ categories, and recording stock movements.
 - For the concurrency tests: Python 3.10 or newer, `psycopg2-binary==2.9.13`, and a
   host-accessible `DATABASE_URL` for the same database.
 
-The race test opens 400 database connections together. Before running it, check the server
-connection limit with `SHOW max_connections;` and make sure it can admit all 400 test
-connections plus normal application and admin sessions. Changing this server setting may
-require a PostgreSQL restart.
+The race test and default simulation each open 400 database connections together. Before
+running either, check the server connection limit with `SHOW max_connections;` and make
+sure it can admit all 400 test connections plus normal application and admin sessions.
+The simulation checks capacity before starting. Changing the server setting may require a
+PostgreSQL restart.
 
 The CSV bundle is pinned by `data_bundle.sha256`. After placing the supplied files in
 `data/`, verify them from the project root before loading:
@@ -61,8 +62,9 @@ The solution scripts run in this order:
 
 ## Run the checks
 
-The order and stock-movement checks roll back their fixture changes. The report checks
-and timing scripts only read data.
+The order and stock-movement checks roll back their fixture changes. The Monday report
+check refreshes summaries inside a transaction and rolls it back; timing scripts only
+read data.
 
 ```sh
 docker exec -w /lab -i kloudkart psql -U postgres -v ON_ERROR_STOP=1 -f sql/tests/place_order_checks.sql
@@ -99,6 +101,36 @@ run, pipe it to a numbered result file, for example:
 set -o pipefail
 python race_test.py | tee results/race_test/race_test_run_6.txt
 ```
+
+## Run the end-to-end simulation
+
+After loading the data and applying `sql/run_all.sql`, the flash-sale-day simulation
+exercises order placement, stock auditing, the recursive category rollup, and the Monday
+report in one run. It uses the existing database and
+temporary fixtures; it does not need another app or service. The default scenario starts
+400 buyers together for 50 units and checks that the result matches the available stock.
+It checks PostgreSQL connection capacity before opening the buyer connections.
+
+Run it from the project root with the virtual environment active and `DATABASE_URL` set:
+
+```sh
+python simulation/flash_sale_day.py
+```
+
+Open `results/simulation/flash_sale_day.html` in a browser for the scorecard and timeline.
+The companion `flash_sale_day.json` contains the same run's machine-readable results.
+Both files are overwritten by the next run. Use `--buyers`, `--stock`, `--threshold`, or
+`--seed` to change the scenario; for example, `python simulation/flash_sale_day.py --buyers 50 --stock 10`.
+
+The script records the opening inventory as a restock, runs one concurrent order attempt
+per simulated customer, marks successful fixture orders completed for the report preview,
+and refreshes the report inside a transaction that is rolled back. It then removes the
+fixture customers, product, categories, orders, and movement rows. Cleanup runs on normal
+completion and handled errors. PostgreSQL sequence counters still advance, leaving normal
+gaps in generated ids after fixtures are removed. The simulation can consume 400 PostgreSQL
+connections, so use it only against the lab server when it has enough room. Its timings are
+local lab measurements, not a production-capacity promise. See
+`docs/flash_sale_simulation.md` for the detailed lifecycle and assumptions.
 
 ## Use the reports
 
@@ -201,6 +233,8 @@ references and preventing deletion of a customer who has orders.
 - `sql/baseline/` — slow report shape used for the before measurement.
 - `customer_link_race_test.py` — checks customer foreign-key enforcement and the
   delete/order race with disposable fixtures.
+- `simulation/flash_sale_day.py` — runs the integrated flash-sale scenario and writes a
+  local HTML scorecard plus JSON output.
 - `results/` — saved diagnosis, race-test, and performance output. The final product-stock
   race evidence is `results/race_test/race_test_run_5.txt`; the final customer-link evidence
   is `results/race_test/customer_link_checks.txt`. Runs 1–4 are earlier history.
@@ -208,6 +242,7 @@ references and preventing deletion of a customer who has orders.
 - `docs/key_decisions.md` and `docs/adr/` — project decisions and supporting records.
 - `docs/memo_to_nana.md` — client memo in the supplied template.
 - `docs/improvement.md` — the extra stock reconciliation improvement.
+- `docs/flash_sale_simulation.md` — simulation scope, checks, cleanup, and limitations.
 
 Never save `DATABASE_URL`, passwords, or customer email addresses in `results/`. The
 diagnosis scripts and their saved outputs use aggregates and ids instead of customer contact
