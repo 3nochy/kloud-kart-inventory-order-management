@@ -15,7 +15,7 @@ problems measured by the scripts; they do not prove which side of a disagreement
 | 4 | Categories unreachable, products uncategorised | 37 products | Low-stock rollup would hide them |
 | 5 | The same customer stored more than once | 535 extra rows | Customer count and spend per customer are off |
 | 6 | Rows pointing at things that do not exist | 692 items, 210 orders, 120 log rows | Silently dropped by any join |
-| 7 | Dates in the future | 16 orders, 33 log rows | Forces a choice of "as of" date |
+| 7 | Rows dated after the diagnosis-time database clock | 16 orders, 33 log rows | Forces a choice of "as of" date |
 
 ## 1. Stock counter disagrees with the stock log
 - **What is wrong:** no constraint ties `products.stock_quantity` to the sum of `inventory_log.change_qty`. 144 of 4,023 products disagree. The counter is below the log for 122 and above for 22; net -2,375 units (₵-3,656,269.44), gross 2,553 units (₵3,865,699.34). 14 products have negative stock (-27 units, ₵-20,627.76).
@@ -66,9 +66,9 @@ problems measured by the scripts; they do not prove which side of a disagreement
 - **What it costs:** small in value, but any join drops them without a warning.
 - **Current treatment:** solution script 06 adds a `NOT VALID` customer foreign key. It leaves the historical orphan orders untouched, while preventing new orders from pointing to missing customers and blocking deletion of customers that have orders. Other historical orphan links remain for a separate cleanup decision.
 
-## 7. Dates in the future
-- 16 orders (₵41,348.75) and 33 log `sale` rows (-59 units) are dated after the database clock. The last order that is not in the future is 2026-11-23.
-- **Fix:** the report is anchored to the last non-future order date and excludes future-dated rows.
+## 7. Rows dated after the diagnosis-time database clock
+- At the time this diagnosis ran, 16 orders (₵41,348.75) and 33 log `sale` rows (-59 units) were dated after the database clock. This finding is time-sensitive: as the clock advances, some of those dates may no longer be in the future.
+- **Report decision:** the initial report cutoff is the fixed baseline Monday, 2026-11-23. It excludes later-dated orders even after those dates have passed; advance the cutoff when producing a later Monday report.
 
 ## Looks wrong but is not
 - `order_items.unit_price` differs from today's price on 4,264 rows: it is the price at the time of sale.

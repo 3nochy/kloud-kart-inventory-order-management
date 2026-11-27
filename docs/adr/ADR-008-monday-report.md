@@ -19,12 +19,13 @@ header as charged at checkout. Count orders whose normalized status is `complete
 customers as stored: duplicate emails are not merged. Exclude orders without a matching
 customer so every report row represents a known customer.
 
-The report is anchored to `report_settings.as_of_date`, initially 2026-11-23, the last
-non-future order date in the extract. Total spend and order count cover all included orders
-through that date. Monthly columns cover the twelve calendar months ending in the as-of
-month, which is partial. `customer_running_total` is a separate order-level view: it shows
-the cumulative spend after each included order for each customer. The summary view remains
-one row per customer.
+The report is anchored to `report_settings.as_of_date`, initially Monday 2026-11-23, the
+fixed baseline date chosen for this lab. It does not advance when the database clock moves;
+orders after that date remain excluded until the cutoff is refreshed. Total spend and order
+count cover all included orders through that date. Monthly columns cover the twelve calendar
+months ending in the as-of month, which is partial. `customer_running_total` is a separate
+order-level view: it shows the cumulative spend after each included order for each customer.
+The summary view remains one row per customer.
 
 Store the totals/rank and monthly values in materialized views so routine Monday reads do
 not rescan the raw order table for every customer. `monday_top_100` uses the stored rank;

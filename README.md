@@ -155,8 +155,10 @@ counts statuses whose trimmed lowercase value is `complete`, `completed`, or `sh
 The supplied data has 15 spellings across five status meanings; pending, cancelled, and
 refunded orders are excluded because they are not completed spend kept by the business.
 See `docs/adr/ADR-008-monday-report.md` for the assumption and its risks. The report uses
-the date in `report_settings` as its as-of date. It starts with 2026-11-23, the last
-non-future order date in the supplied data. Customer rows are not merged by email.
+the date in `report_settings` as its as-of date. Its initial cutoff is the fixed baseline
+Monday, 2026-11-23; it does not advance automatically when the database clock moves. Orders
+after that date remain outside the report until the cutoff is refreshed. Customer rows are
+not merged by email.
 
 The report totals and monthly spend are materialized views. After new orders arrive, update
 the report cutoff and refresh both summaries together with the procedure:

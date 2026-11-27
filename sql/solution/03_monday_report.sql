@@ -15,7 +15,8 @@
 --             refunded orders are excluded because they are not completed kept spend.
 --           * The report is as of the date in report_settings, not the clock, so the same
 --             data always gives the same figures. The data holds 16 orders dated after
---             2026-11-23; they are excluded until the date is moved.
+--             2026-11-23; they are excluded until the date is moved. This is a fixed
+--             baseline Monday, not a value that tracks the latest order or current date.
 --           * Duplicate customers (same email and name) are not merged.
 -- Refresh : figures are as of the last refresh. Call refresh_monday_report(as_of_date) to
 --           update the cutoff and both materialized views in one transaction. This uses
