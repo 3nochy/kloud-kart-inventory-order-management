@@ -2,7 +2,7 @@
 
 **From:** Enoch Kumi Asamoah
 
-**Date:** 26 November 2026
+**Date:** 27 November 2026
 
 **Subject:** Inventory accuracy and Monday reporting
 
@@ -18,13 +18,14 @@ normal tree. The data does not prove which side is right for many of these recor
 
 | What you asked for | Status | Evidence |
 |---|---|---|
-| Stop two buyers taking the same last unit | Done in the lab; run 5 passed. The 400-buyer test sold 50 units, refused 350, and had no errors. | [Race test run 5](../results/race_test/race_test_run_5.txt) |
-| Monday customer-spending report | Done. All 13 checks passed; all 40,420 customers returned in about 0.56 seconds. Running balances are available in a separate order-level view. | [Report checks](../results/performance/monday_report_checks.txt), [timing](../results/performance/monday_report_after_indexes.txt) |
-| Low-stock view through nested categories | Done. The tree has no fixed depth limit; the latest run took about 0.61 seconds. Five units is only a sample threshold. | [Category timing](../results/performance/category_rollup_after_indexes.txt) |
-| Record stock movements | Done for changes made after installation. Sales, restocks, returns, damage, counts, corrections, and direct quantity updates are logged. | [Movement checks](../results/race_test/stock_movement_checks.txt) |
+| Stop two buyers taking the same last unit | Passed after a clean reload: 25/25 last-unit rounds succeeded; the 400-buyer run sold 50 units, refused 350, and had no errors. | [Fresh-load race test](../results/race_test/race_test_fresh_load.txt) |
+| Monday customer-spending report | Passed all 13 fresh-load checks; all 40,420 customers returned in about 0.53 seconds. Running balances are available in a separate order-level view. | [Fresh-load report checks](../results/performance/monday_report_checks_fresh_load.txt), [fresh-load timing](../results/performance/monday_report_timing_fresh_load.txt) |
+| Low-stock view through nested categories | Passed after a clean reload. The tree has no fixed depth limit; the latest run took about 0.63 seconds. Five units is only a sample threshold. | [Fresh-load category timing](../results/performance/category_rollup_timing_fresh_load.txt) |
+| Record stock movements | Passed after a clean reload. Sales, restocks, returns, damage, counts, corrections, and direct quantity updates are logged. | [Fresh-load movement checks](../results/race_test/stock_movement_checks_fresh_load.txt) |
 
 I also added a count queue that ranks the 144 stock/log disagreements by estimated value
 so your team can decide which products to count first. It does not change quantities.
+The clean-load check again found 144 products in that queue: [fresh-load queue output](../results/diagnosis/reconciliation_queue_checks_fresh_load.txt).
 
 ## What I recommend
 

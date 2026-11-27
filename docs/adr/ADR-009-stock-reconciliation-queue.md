@@ -51,6 +51,7 @@ those rows can pass the check.
 
 - **Implemented:** the view and `NOT VALID` check are in
   `sql/solution/06_constraints_and_reconciliation.sql`.
-- **Verified:** the queue contained 144 products, and the priority numbers were consecutive
-  (`results/diagnosis/reconciliation_queue_checks.txt`). The queue is not a substitute for
-  physical counts.
+- **Verified:** after a clean reload, the queue contained 144 products and the priority
+  numbers were consecutive
+  (`results/diagnosis/reconciliation_queue_checks_fresh_load.txt`). The queue is not a
+  substitute for physical counts.

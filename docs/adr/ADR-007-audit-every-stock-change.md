@@ -66,9 +66,10 @@ rows remain without an actor because the source data does not say who made them.
 - **Implemented:** `sql/solution/05_stock_movement_audit.sql` installs the trigger and
   movement function; the updated `sql/solution/02_place_order.sql` uses the trigger for
   linked sale rows.
-- **Verified:** the rollback-safe stock movement check passed for a restock, a correction,
-  a direct update, and a refused underflow (`results/race_test/stock_movement_checks.txt`).
-  Race test run 4 passed after the trigger was installed
-  (`results/race_test/race_test_run_4.txt`).
+- **Verified:** after a clean reload, the rollback-safe stock movement check passed for a
+  restock, a correction, a direct update, and a refused underflow
+  (`results/race_test/stock_movement_checks_fresh_load.txt`). The fresh-load race test
+  passed 25 last-unit rounds and recorded movements for successful sales
+  (`results/race_test/race_test_fresh_load.txt`).
 - **Not verified:** a trusted per-person identity when Kloud Kart uses a shared database
   login, and the handling of automated cancellations/refunds.

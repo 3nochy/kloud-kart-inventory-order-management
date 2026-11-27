@@ -13,6 +13,7 @@ SELECT (SELECT min(customers.customer_id) FROM customers) AS customer_id,
        (SELECT min(products.product_id)
         FROM products
         WHERE products.stock_quantity > 0
+          -- Leave room for the stock + 1 request below without integer overflow.
           AND products.stock_quantity < 2147483647) AS product_id;
 
 DO $$

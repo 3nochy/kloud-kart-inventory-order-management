@@ -35,6 +35,6 @@ staff must confirm the shelf quantity before correcting stock.
 
 - SQL view and non-validated check: `sql/solution/06_constraints_and_reconciliation.sql`.
 - Check blocks new negative stock without rewriting the 14 existing negative records.
-- The saved check confirmed 144 queued products and consecutive review priorities:
-  `results/diagnosis/reconciliation_queue_checks.txt`.
+- The saved clean-load check confirmed 144 queued products and consecutive review
+  priorities: `results/diagnosis/reconciliation_queue_checks_fresh_load.txt`.
 - ADR: `docs/adr/ADR-009-stock-reconciliation-queue.md`.

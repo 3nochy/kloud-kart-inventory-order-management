@@ -238,9 +238,10 @@ references and preventing deletion of a customer who has orders.
   delete/order race with disposable fixtures.
 - `simulation/flash_sale_day.py` — runs the integrated flash-sale scenario and writes a
   local HTML scorecard plus JSON output.
-- `results/` — saved diagnosis, race-test, and performance output. The final product-stock
-  race evidence is `results/race_test/race_test_run_5.txt`; the final customer-link evidence
-  is `results/race_test/customer_link_checks.txt`. Runs 1–4 are earlier history.
+- `results/` — saved diagnosis, race-test, and performance output. The latest product-stock
+  race evidence after a clean reload is `results/race_test/race_test_fresh_load.txt`; runs
+  1–5 are earlier history. Customer-link race evidence is
+  `results/race_test/customer_link_checks.txt`.
 - `docs/data_diagnosis.md` — risk-ranked diagnosis of the supplied data.
 - `docs/key_decisions.md` and `docs/adr/` — project decisions and supporting records.
 - `docs/memo_to_nana.md` — client memo in the supplied template.

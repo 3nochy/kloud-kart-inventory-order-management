@@ -50,11 +50,12 @@ foreign key then prevents deletion after the new order commits.
   `sql/solution/06_constraints_and_reconciliation.sql`; the key-share lock is in
   `sql/solution/02_place_order.sql`. The focused check is
   `customer_link_race_test.py`.
-- **Verified after installation:** `sql/run_all.sql` completed successfully. The
-  rollback-safe order checks passed, and race-test run 5 passed all 25 last-unit rounds;
-  its 400-buyer test sold 50 of 50 units, refused 350, and had zero errors in 2.66 seconds.
-  Evidence is in `results/setup/run_all.txt`, `results/race_test/place_order_checks.txt`,
-  and `results/race_test/race_test_run_5.txt`.
+- **Verified after a clean reload:** `sql/run_all.sql` completed successfully, the
+  rollback-safe order checks passed, and the fresh-load race test passed all 25 last-unit
+  rounds; its 400-buyer test sold 50 of 50 units, refused 350, and had zero errors in
+  2.46 seconds. Evidence is in `results/setup/run_all_fresh_load.txt`,
+  `results/race_test/place_order_checks_fresh_load.txt`, and
+  `results/race_test/race_test_fresh_load.txt`.
 - **Verified customer-link behavior:** `customer_link_race_test.py` passed all three checks:
   the database rejected a direct order for a missing customer, refused to delete a customer
   with an order, and returned `Customer not found` during a concurrent delete/order race

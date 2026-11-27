@@ -59,10 +59,9 @@ data arrives; it changes the cutoff and refreshes both materialized views in one
 
 ## Consequences
 
-- **What this buys:** on the measured database, the full report read returned 40,420
-  customers in about 0.56 seconds after adding source indexes; the top 100 took about
-  0.008 seconds in that run. The monthly values and rankings are precomputed, so a normal
-  read is quick.
+- **What this buys:** after a clean reload, the full report read returned 40,420 customers
+  in about 0.53 seconds; the top 100 took about 0.007 seconds in that run. The monthly
+  values and rankings are precomputed, so a normal read is quick.
 - **What this costs:** figures are as of the last refresh, not live. The atomic refresh uses
   regular materialized-view refreshes, which can briefly block report readers while the
   summaries rebuild. Rebuilding with the solution script drops and recreates report objects
@@ -75,9 +74,9 @@ data arrives; it changes the cutoff and refreshes both materialized views in one
 
 ## What this survives
 
-- **Verified:** thirteen independent checks passed in
-  `results/performance/monday_report_checks.txt`. The full report timing and query plan are
-  in `results/performance/monday_report_after_indexes.txt`.
+- **Verified:** thirteen independent checks passed after a clean reload in
+  `results/performance/monday_report_checks_fresh_load.txt`. The full report timing and
+  query plan are in `results/performance/monday_report_timing_fresh_load.txt`.
 - **Comparison limit:** the baseline is a 500-customer sample with fewer fields, while the
   optimized result times the top 100 and the complete report. The baseline full-run figure
   is estimated, not measured; the readings demonstrate the different query shapes and
